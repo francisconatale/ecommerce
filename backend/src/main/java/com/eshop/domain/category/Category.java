@@ -15,12 +15,7 @@ public class Category {
     private UUID id;
     private String name;
     private UUID parentId;
-    
     private boolean isSystem;
-    
     private String pathNames;
-    
-    private boolean deleted;
-    
-    // Domain behavior methods to be implemented
+    private boolean deleted;    
 }
