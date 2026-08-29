@@ -43,6 +43,14 @@ public class ProductRepositoryAdapter implements ProductRepository {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Product> findByCategoryAndDescendants(UUID categoryId) {
+        log.debug("Buscando productos de categoría y descendientes en DB: {}", categoryId);
+        return repository.findByCategoryAndDescendants(categoryId).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
     private Product toDomain(ProductEntity entity) {
         Product domain = new Product();
         domain.setId(entity.getId());

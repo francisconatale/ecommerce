@@ -59,6 +59,67 @@ public class CategoryService {
     }
 
     @Transactional
+    public Category update(UUID categoryId, String newName, UUID newParentId) {
+        log.info("Actualizando categoría {}: nuevo nombre='{}', nuevo parentId='{}'", categoryId, newName, newParentId);
+        Category category = categoryRepository.findById(categoryId)
+            .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+
+        if (category.isSystem()) {
+            throw new IllegalArgumentException("Cannot update a system category");
+        }
+
+        String oldName = category.getName();
+        String oldPath = category.getPathNames();
+        
+        boolean nameChanged = newName != null && !newName.trim().isEmpty() && !oldName.equals(newName);
+        boolean parentChanged = (newParentId != null && !newParentId.equals(category.getParentId())) || 
+                                (newParentId == null && category.getParentId() != null);
+
+        if (nameChanged) {
+            category.setName(newName);
+        }
+
+        if (parentChanged) {
+            if (newParentId != null) {
+                boolean isDescendant = closureRepository.isDescendant(categoryId, newParentId);
+                validateMove(categoryId, newParentId, isDescendant, 0); // Skipping depth validation for MVP
+            }
+            
+            // Re-parent in closure table
+            closureRepository.disconnectSubtree(categoryId);
+            if (newParentId != null) {
+                closureRepository.connectSubtree(categoryId, newParentId);
+            }
+            category.setParentId(newParentId);
+        }
+
+        if (nameChanged || parentChanged) {
+            String newPath = category.getName();
+            if (category.getParentId() != null) {
+                Category parent = categoryRepository.findById(category.getParentId())
+                    .orElseThrow(() -> new IllegalArgumentException("New parent not found"));
+                newPath = parent.getPathNames() + PATH_SEPARATOR + category.getName();
+            }
+            category.setPathNames(newPath);
+            categoryRepository.save(category);
+
+            // Update all descendants' paths
+            List<Category> descendants = categoryRepository.findDescendants(categoryId);
+            for (Category desc : descendants) {
+                if (desc.getPathNames() != null && oldPath != null && desc.getPathNames().startsWith(oldPath)) {
+                    String updatedDescPath = newPath + desc.getPathNames().substring(oldPath.length());
+                    desc.setPathNames(updatedDescPath);
+                    categoryRepository.save(desc);
+                }
+            }
+        } else {
+            categoryRepository.save(category);
+        }
+
+        return category;
+    }
+
+    @Transactional
     public void assignProduct(UUID productId, UUID categoryId) {
         log.info("Asignando producto {} a categoría {}", productId, categoryId);
         Category category = categoryRepository.findById(categoryId)

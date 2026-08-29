@@ -27,4 +27,20 @@ public interface SpringDataCategoryClosureRepository extends JpaRepository<Categ
     @Modifying
     @Query(value = "DELETE FROM category_closure WHERE descendant_id = :nodeId OR ancestor_id = :nodeId", nativeQuery = true)
     void removeNodeFromTree(@Param("nodeId") UUID nodeId);
+
+    @Modifying
+    @Query(value = "DELETE FROM category_closure " +
+                   "WHERE descendant_id IN (SELECT descendant_id FROM (SELECT descendant_id FROM category_closure WHERE ancestor_id = :nodeId) AS sub1) " +
+                   "AND ancestor_id IN (SELECT ancestor_id FROM (SELECT ancestor_id FROM category_closure WHERE descendant_id = :nodeId AND ancestor_id != :nodeId) AS sub2)", nativeQuery = true)
+    void disconnectSubtree(@Param("nodeId") UUID nodeId);
+
+    @Modifying
+    @Query(value = "INSERT INTO category_closure (ancestor_id, descendant_id, depth) " +
+                   "SELECT supertree.ancestor_id, subtree.descendant_id, supertree.depth + subtree.depth + 1 " +
+                   "FROM category_closure supertree CROSS JOIN category_closure subtree " +
+                   "WHERE supertree.descendant_id = :newParentId AND subtree.ancestor_id = :nodeId", nativeQuery = true)
+    void connectSubtree(@Param("nodeId") UUID nodeId, @Param("newParentId") UUID newParentId);
+
+    @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM category_closure WHERE ancestor_id = :nodeId AND descendant_id = :newParentId", nativeQuery = true)
+    boolean isDescendant(@Param("nodeId") UUID nodeId, @Param("newParentId") UUID newParentId);
 }
