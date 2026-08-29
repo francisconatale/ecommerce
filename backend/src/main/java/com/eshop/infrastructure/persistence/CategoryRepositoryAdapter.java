@@ -46,6 +46,14 @@ public class CategoryRepositoryAdapter implements CategoryRepository {
     }
 
     @Override
+    public List<Category> findAll() {
+        log.debug("Buscando todas las categorías en DB");
+        return repository.findAll().stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void delete(Category category) {
         log.debug("Eliminando categoría en DB: {}", category.getId());
         repository.deleteById(category.getId());

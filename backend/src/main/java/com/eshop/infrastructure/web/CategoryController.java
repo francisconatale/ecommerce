@@ -29,6 +29,12 @@ public class CategoryController {
         log.info("Petición POST procesada exitosamente para categoría: {}", category.getName());
     }
 
+    @GetMapping("/categories")
+    public List<Category> getAllCategories() {
+        log.info("Recibida petición GET para obtener todas las categorías");
+        return categoryService.findAll();
+    }
+
     @PutMapping("/products/{productId}/category/{categoryId}")
     public void assignProductToCategory(@PathVariable UUID productId, @PathVariable UUID categoryId) {
         log.info("Recibida petición PUT para asignar producto {} a categoría {}", productId, categoryId);

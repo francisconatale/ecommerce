@@ -52,6 +52,12 @@ public class CategoryService {
         return category;
     }
 
+    @Transactional(readOnly = true)
+    public List<Category> findAll() {
+        log.info("Obteniendo todas las categorías");
+        return categoryRepository.findAll();
+    }
+
     @Transactional
     public void assignProduct(UUID productId, UUID categoryId) {
         log.info("Asignando producto {} a categoría {}", productId, categoryId);
