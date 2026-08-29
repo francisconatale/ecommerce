@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: eshop-db
+    environment:
+      POSTGRES_USER: eshop_user
+      POSTGRES_PASSWORD: eshop_password
+      POSTGRES_DB: eshop
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eshop_user -d eshop"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: eclipse-temurin:17-jdk-alpine
+    container_name: eshop-backend
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+      - maven-repo:/root/.m2
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/eshop
+      - SPRING_DATASOURCE_USERNAME=eshop_user
+      - SPRING_DATASOURCE_PASSWORD=eshop_password
+    command: ./mvnw spring-boot:run
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  maven-repo:
