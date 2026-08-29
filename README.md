@@ -1,32 +1,62 @@
 # Prototype E-Shop
 
-Proyecto MVP de E-Commerce desarrollado con un enfoque en prototipado rápido impulsado por Inteligencia Artificial y un diseño arquitectónico sólido y escalable.
+![Java](https://img.shields.io/badge/Java-17-blue)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)
+![Architecture](https://img.shields.io/badge/Architecture-Hexagonal-orange)
 
-## Stack de Backend
+A scalable, backend-first E-Commerce MVP. Built with a strict separation of concerns utilizing Hexagonal Architecture, ensuring the domain remains completely agnostic of the underlying framework and persistence layers.
 
-El núcleo del sistema (backend) está construido priorizando la separación de responsabilidades y la integridad de los datos:
+## 🚀 Features
 
-- **Lenguaje:** Java 17
-- **Framework Principal:** Spring Boot 4.1.1 (WebMVC, Data JPA)
-- **Base de Datos:** PostgreSQL
-- **Migraciones:** Flyway (para versionado estricto del esquema SQL)
-- **Productividad:** Lombok (para reducir el boilerplate de getters, setters, etc.)
-- **Testing:** Testcontainers (para tests de integración ejecutados sobre una DB PostgreSQL real efímera, detectando constraints reales en lugar de usar Mocks).
+- **Hierarchical Catalog:** Categories are modeled using a Closure Table, allowing for ultra-fast infinite depth querying and safe category reparenting.
+- **Data Integrity:** Integration tests run on ephemeral PostgreSQL instances via Testcontainers. 
+- **Hexagonal Architecture:** Domain entities are isolated. Infrastructure dependencies (Spring Data, DBs) communicate strictly through Adapters.
+- **Soft Deletion:** Core entities (Products, Categories) use logical deletion (`deleted = true`) to preserve reporting and invoicing history.
 
-## Arquitectura y Patrones
+## 🛠 Tech Stack
 
-- **Arquitectura Hexagonal (Puertos y Adaptadores):** La capa de Dominio (`/domain`) está 100% aislada. No conoce sobre Spring ni bases de datos. Todo el acceso a datos se hace mediante **Adapters** ubicados en la capa de Infraestructura (`/infrastructure`).
-- **Category Closure Table:** El árbol de categorías se modela usando el patrón de *Closure Table* en base de datos. Permite consultas jerárquicas ultrarrápidas, reasignaciones de productos seguras y evita problemas de N+1 comunes en jerarquías infinitas.
-- **Soft Deletes:** Las entidades principales (`Product`, `Category`) utilizan un esquema de borrado lógico (flag `deleted`) en lugar de eliminarse físicamente, preservando el historial para futuras facturas o reportes.
+- **Core:** Java 17, Spring Boot 4.1.1 (WebMVC, Data JPA)
+- **Database:** PostgreSQL, Flyway (Migrations)
+- **Testing:** JUnit 5, Testcontainers
+- **Utilities:** Lombok
 
-## Stack de Prototipado y Flujo de Trabajo (AI-Driven)
+## ⚙️ Prerequisites
 
-Este proyecto fue desarrollado bajo una metodología ágil guiada por herramientas de automatización y agentes de IA:
+- JDK 17
+- Docker (Required for Testcontainers)
+- Maven (or use the provided wrapper)
 
-- **Antigravity CLI:** Entorno principal para la interacción y automatización con agentes de IA.
-- **SpecKit Workflow:** Herramienta utilizada para planificar, generar especificaciones (`spec.md`), desglosar tareas (`tasks.md`) y mantener la **Constitución del Proyecto** (`constitution.md`), forzando a la IA a respetar reglas arquitectónicas (ej: uso estricto de Adapters y Testcontainers).
-- **Test-Driven Development (TDD) + Integration First:** Se priorizó asegurar el comportamiento contra una base de datos real (Testcontainers) antes de escalar los endpoints de la API.
+## 💻 Running Locally
 
----
+1. Clone the repository
+2. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+3. Run the application (this will automatically execute Flyway migrations against your configured DB):
+   ```bash
+   ./mvnw spring-boot:run
+   ```
 
-*Nota: Todas las decisiones arquitectónicas clave se encuentran detalladas en la carpeta `backend/documentation/` mediante ADRs (Architecture Decision Records).*
+## 🧪 Testing
+
+The test suite runs integration tests against a real PostgreSQL instance to validate constraints and closure table queries.
+
+```bash
+cd backend
+./mvnw clean test
+```
+
+## 📁 Project Structure
+
+```text
+backend/
+├── src/main/java/com/eshop/
+│   ├── domain/           # Pure Java business logic (Entities, Interfaces)
+│   ├── application/      # Use cases coordinating the domain
+│   └── infrastructure/   # Spring Boot Adapters, JPA Entities, REST Controllers
+├── src/main/resources/
+│   └── db/migration/     # Flyway SQL schemas
+└── documentation/        # Architecture Decision Records (ADRs)
+```
