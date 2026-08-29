@@ -29,15 +29,22 @@ A scalable, backend-first E-Commerce MVP. Built with a strict separation of conc
 
 ## 💻 Running Locally
 
+We recommend using Docker Compose to spin up the backend and database simultaneously.
+
 1. Clone the repository
-2. Navigate to the backend directory:
+2. From the root directory, build and run the services:
    ```bash
-   cd backend
+   docker-compose up --build
    ```
-3. Run the application (this will automatically execute Flyway migrations against your configured DB):
-   ```bash
-   ./mvnw spring-boot:run
-   ```
+*(Alternatively, you can run the PostgreSQL database in Docker and launch the Spring Boot app natively using `./mvnw spring-boot:run` in the `backend` directory).*
+
+## 📖 API Documentation (Swagger UI)
+
+The backend exposes an auto-generated, interactive OpenAPI specification using **Springdoc**. 
+Once the application is running, you can explore the API endpoints, view schemas, and execute test requests directly from your browser:
+
+- **Swagger UI:** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- **OpenAPI JSON:** [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
 
 ## 🧪 Testing
 
