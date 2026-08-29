@@ -35,6 +35,18 @@ public class CategoryController {
         return categoryService.findAll();
     }
 
+    @PutMapping("/categories/{id}")
+    public Category updateCategory(@PathVariable UUID id, @RequestBody Category category) {
+        log.info("Recibida petición PUT para actualizar categoría {}", id);
+        return categoryService.update(id, category.getName(), category.getParentId());
+    }
+
+    @DeleteMapping("/categories/{id}")
+    public void deleteCategory(@PathVariable UUID id) {
+        log.info("Recibida petición DELETE para borrar categoría {}", id);
+        categoryService.delete(id);
+    }
+
     @PutMapping("/products/{productId}/category/{categoryId}")
     public void assignProductToCategory(@PathVariable UUID productId, @PathVariable UUID categoryId) {
         log.info("Recibida petición PUT para asignar producto {} a categoría {}", productId, categoryId);

@@ -85,7 +85,6 @@ public class CategoryServiceTest {
 
     @Test
     void shouldDeleteLeafCategory() {
-        // Deleting "Leaf" (Parent: "Middle")
         Category root = service.create("Root", null);
         Category middle = service.create("Middle", root.getId());
         Category leaf = service.create("Leaf", middle.getId());

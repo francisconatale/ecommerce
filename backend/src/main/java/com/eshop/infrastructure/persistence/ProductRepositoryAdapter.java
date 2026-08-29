@@ -51,6 +51,20 @@ public class ProductRepositoryAdapter implements ProductRepository {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Product> findAll() {
+        log.debug("Buscando todos los productos en DB");
+        return repository.findAll().stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void delete(Product product) {
+        log.debug("Borrando producto en DB: {}", product.getId());
+        repository.deleteById(product.getId());
+    }
+
     private Product toDomain(ProductEntity entity) {
         Product domain = new Product();
         domain.setId(entity.getId());

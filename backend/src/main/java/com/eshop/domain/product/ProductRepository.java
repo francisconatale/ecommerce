@@ -9,4 +9,6 @@ public interface ProductRepository {
     Product save(Product product);
     List<Product> findByCategoryId(UUID categoryId);
     List<Product> findByCategoryAndDescendants(UUID categoryId);
+    List<Product> findAll();
+    void delete(Product product);
 }

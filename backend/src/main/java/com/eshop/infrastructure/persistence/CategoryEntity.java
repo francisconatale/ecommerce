@@ -7,8 +7,13 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 @Entity
 @Table(name = "category")
+@SQLDelete(sql = "UPDATE category SET deleted = true WHERE id = ?")
+@SQLRestriction("deleted = false")
 @Getter
 @Setter
 public class CategoryEntity {

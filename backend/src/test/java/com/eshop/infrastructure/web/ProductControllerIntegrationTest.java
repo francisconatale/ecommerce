@@ -1,8 +1,10 @@
 package com.eshop.infrastructure.web;
 
 import com.eshop.TestcontainersConfiguration;
+import com.eshop.domain.product.Product;
 import com.eshop.domain.category.Category;
 import com.eshop.domain.category.CategoryService;
+import com.eshop.domain.product.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,54 +16,62 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.math.BigDecimal;
+import java.util.UUID;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import java.util.UUID;
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
-public class CategoryControllerIntegrationTest {
+public class ProductControllerIntegrationTest {
 
     private MockMvc mockMvc;
 
     @Autowired
     private WebApplicationContext context;
 
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-    }
+    @Autowired
+    private ProductService productService;
 
     @Autowired
     private CategoryService categoryService;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    @Test
-    void shouldUpdateCategory() throws Exception {
-        Category category = categoryService.create("Initial Name", null);
-        
-        category.setName("Updated Name");
-        
-        mockMvc.perform(put("/api/categories/" + category.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(category)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Updated Name"));
-                
-        Category updated = categoryService.findAll().stream().filter(c -> c.getId().equals(category.getId())).findFirst().get();
-        assertThat(updated.getName()).isEqualTo("Updated Name");
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
     @Test
-    void shouldDeleteCategory() throws Exception {
-        Category category = categoryService.create("To Be Deleted", null);
+    void shouldCreateProduct() throws Exception {
+        Category category = categoryService.create("Product Category", null);
         
-        mockMvc.perform(delete("/api/categories/" + category.getId()))
+        Product product = new Product();
+        product.setName("Integration Test Product");
+        product.setPriceBuy(BigDecimal.valueOf(10.5));
+        product.setPriceSell(BigDecimal.valueOf(20.0));
+        product.setCategoryId(category.getId());
+        
+        mockMvc.perform(post("/api/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(product)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Integration Test Product"));
+    }
+
+    @Test
+    void shouldSoftDeleteProduct() throws Exception {
+        Category category = categoryService.create("Category for Deletion", null);
+        Product product = productService.create("To Be Deleted Product", BigDecimal.ONE, BigDecimal.TEN, category.getId());
+        
+        mockMvc.perform(delete("/api/products/" + product.getId()))
                 .andExpect(status().isOk());
                 
-        boolean exists = categoryService.findAll().stream().anyMatch(c -> c.getId().equals(category.getId()));
+        // Verification: It shouldn't be found in findAll
+        boolean exists = productService.findAll().stream().anyMatch(p -> p.getId().equals(product.getId()));
         assertThat(exists).isFalse();
     }
 }
