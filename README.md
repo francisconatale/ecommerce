@@ -7,27 +7,27 @@
 
 A scalable, backend-first E-Commerce MVP. Built with a strict separation of concerns utilizing Hexagonal Architecture, ensuring the domain remains completely agnostic of the underlying framework and persistence layers.
 
-## 🚀 Features
+## Features
 
 - **Hierarchical Catalog:** Categories are modeled using a Closure Table, allowing for ultra-fast infinite depth querying and safe category reparenting.
 - **Data Integrity:** Integration tests run on ephemeral PostgreSQL instances via Testcontainers. 
 - **Hexagonal Architecture:** Domain entities are isolated. Infrastructure dependencies (Spring Data, DBs) communicate strictly through Adapters.
 - **Soft Deletion:** Core entities (Products, Categories) use logical deletion (`deleted = true`) to preserve reporting and invoicing history.
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - **Core:** Java 17, Spring Boot 4.1.1 (WebMVC, Data JPA)
 - **Database:** PostgreSQL, Flyway (Migrations)
 - **Testing:** JUnit 5, Testcontainers
 - **Utilities:** Lombok
 
-## ⚙️ Prerequisites
+## Prerequisites
 
 - JDK 17
 - Docker (Required for Testcontainers)
 - Maven (or use the provided wrapper)
 
-## 💻 Running Locally
+## Running Locally
 
 We recommend using Docker Compose to spin up the backend and database simultaneously.
 
@@ -46,7 +46,7 @@ Once the application is running, you can explore the API endpoints, view schemas
 - **Swagger UI:** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 - **OpenAPI JSON:** [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
 
-## 🧪 Testing
+## Testing
 
 The test suite runs integration tests against a real PostgreSQL instance to validate constraints and closure table queries.
 
@@ -55,7 +55,7 @@ cd backend
 ./mvnw clean test
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 backend/
