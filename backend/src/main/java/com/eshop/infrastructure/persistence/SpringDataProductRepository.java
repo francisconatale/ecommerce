@@ -14,12 +14,9 @@ public interface SpringDataProductRepository extends JpaRepository<ProductEntity
         UUID getId();
         String getName();
         Double getPriceSell();
-        String getBreadcrumb(); // Maps to category.path_names
+        String getBreadcrumb(); 
     }
 
-    /**
-     * T014: Fetch all products and their breadcrumbs in O(1) for a given category tree.
-     */
     @Query(value = "SELECT p.id as id, p.name as name, p.price_sell as priceSell, c.path_names as breadcrumb " +
                    "FROM product p " +
                    "JOIN category_closure cc ON p.category_id = cc.descendant_id " +
