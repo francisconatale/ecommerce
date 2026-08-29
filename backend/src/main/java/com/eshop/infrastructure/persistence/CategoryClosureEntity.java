@@ -4,9 +4,14 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.UUID;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
 @Table(name = "category_closure")
 @IdClass(CategoryClosureEntity.CategoryClosureId.class)
+@Getter
+@Setter
 public class CategoryClosureEntity {
     
     @Id
@@ -22,6 +27,5 @@ public class CategoryClosureEntity {
     public static class CategoryClosureId implements Serializable {
         private UUID ancestorId;
         private UUID descendantId;
-        // equals and hashcode omitted for stub
     }
 }

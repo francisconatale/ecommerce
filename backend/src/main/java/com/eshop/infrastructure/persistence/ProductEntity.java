@@ -5,8 +5,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
 @Table(name = "product")
+@Getter
+@Setter
 public class ProductEntity {
     @Id
     private UUID id;
@@ -28,30 +33,6 @@ public class ProductEntity {
     private LocalDateTime updatedAt;
     
     private boolean deleted;
-
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-    
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    
-    public BigDecimal getPriceBuy() { return priceBuy; }
-    public void setPriceBuy(BigDecimal priceBuy) { this.priceBuy = priceBuy; }
-    
-    public BigDecimal getPriceSell() { return priceSell; }
-    public void setPriceSell(BigDecimal priceSell) { this.priceSell = priceSell; }
-    
-    public UUID getCategoryId() { return categoryId; }
-    public void setCategoryId(UUID categoryId) { this.categoryId = categoryId; }
-    
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-    
-    public boolean isDeleted() { return deleted; }
-    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     @PrePersist
     protected void onCreate() {
