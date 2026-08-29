@@ -1,0 +1,171 @@
+﻿{
+    "openapi":  "3.0.1",
+    "info":  {
+                 "title":  "OpenAPI definition",
+                 "version":  "v0"
+             },
+    "servers":  [
+                    {
+                        "url":  "http://localhost:8080",
+                        "description":  "Generated server url"
+                    }
+                ],
+    "paths":  {
+                  "/api/products/{productId}/category/{categoryId}":  {
+                                                                          "put":  {
+                                                                                      "tags":  [
+                                                                                                   "category-controller"
+                                                                                               ],
+                                                                                      "operationId":  "assignProductToCategory",
+                                                                                      "parameters":  [
+                                                                                                         {
+                                                                                                             "name":  "productId",
+                                                                                                             "in":  "path",
+                                                                                                             "required":  true,
+                                                                                                             "schema":  {
+                                                                                                                            "type":  "string",
+                                                                                                                            "format":  "uuid"
+                                                                                                                        }
+                                                                                                         },
+                                                                                                         {
+                                                                                                             "name":  "categoryId",
+                                                                                                             "in":  "path",
+                                                                                                             "required":  true,
+                                                                                                             "schema":  {
+                                                                                                                            "type":  "string",
+                                                                                                                            "format":  "uuid"
+                                                                                                                        }
+                                                                                                         }
+                                                                                                     ],
+                                                                                      "responses":  {
+                                                                                                        "200":  {
+                                                                                                                    "description":  "OK"
+                                                                                                                }
+                                                                                                    }
+                                                                                  }
+                                                                      },
+                  "/api/categories":  {
+                                          "get":  {
+                                                      "tags":  [
+                                                                   "category-controller"
+                                                               ],
+                                                      "operationId":  "getAllCategories",
+                                                      "responses":  {
+                                                                        "200":  {
+                                                                                    "description":  "OK",
+                                                                                    "content":  {
+                                                                                                    "*/*":  {
+                                                                                                                "schema":  {
+                                                                                                                               "type":  "array",
+                                                                                                                               "items":  {
+                                                                                                                                             "$ref":  "#/components/schemas/Category"
+                                                                                                                                         }
+                                                                                                                           }
+                                                                                                            }
+                                                                                                }
+                                                                                }
+                                                                    }
+                                                  },
+                                          "post":  {
+                                                       "tags":  [
+                                                                    "category-controller"
+                                                                ],
+                                                       "operationId":  "createCategory",
+                                                       "requestBody":  {
+                                                                           "content":  {
+                                                                                           "application/json":  {
+                                                                                                                    "schema":  {
+                                                                                                                                   "$ref":  "#/components/schemas/Category"
+                                                                                                                               }
+                                                                                                                }
+                                                                                       },
+                                                                           "required":  true
+                                                                       },
+                                                       "responses":  {
+                                                                         "200":  {
+                                                                                     "description":  "OK"
+                                                                                 }
+                                                                     }
+                                                   }
+                                      },
+                  "/api/categories/{id}/products":  {
+                                                        "get":  {
+                                                                    "tags":  [
+                                                                                 "category-controller"
+                                                                             ],
+                                                                    "operationId":  "getProductsByCategory",
+                                                                    "parameters":  [
+                                                                                       {
+                                                                                           "name":  "id",
+                                                                                           "in":  "path",
+                                                                                           "required":  true,
+                                                                                           "schema":  {
+                                                                                                          "type":  "string",
+                                                                                                          "format":  "uuid"
+                                                                                                      }
+                                                                                       }
+                                                                                   ],
+                                                                    "responses":  {
+                                                                                      "200":  {
+                                                                                                  "description":  "OK",
+                                                                                                  "content":  {
+                                                                                                                  "*/*":  {
+                                                                                                                              "schema":  {
+                                                                                                                                             "type":  "array",
+                                                                                                                                             "items":  {
+                                                                                                                                                           "$ref":  "#/components/schemas/ProductWithBreadcrumb"
+                                                                                                                                                       }
+                                                                                                                                         }
+                                                                                                                          }
+                                                                                                              }
+                                                                                              }
+                                                                                  }
+                                                                }
+                                                    }
+              },
+    "components":  {
+                       "schemas":  {
+                                       "Category":  {
+                                                        "type":  "object",
+                                                        "properties":  {
+                                                                           "id":  {
+                                                                                      "type":  "string",
+                                                                                      "format":  "uuid"
+                                                                                  },
+                                                                           "name":  {
+                                                                                        "type":  "string"
+                                                                                    },
+                                                                           "parentId":  {
+                                                                                            "type":  "string",
+                                                                                            "format":  "uuid"
+                                                                                        },
+                                                                           "pathNames":  {
+                                                                                             "type":  "string"
+                                                                                         },
+                                                                           "system":  {
+                                                                                          "type":  "boolean"
+                                                                                      }
+                                                                       }
+                                                    },
+                                       "ProductWithBreadcrumb":  {
+                                                                     "type":  "object",
+                                                                     "properties":  {
+                                                                                        "breadcrumb":  {
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                        "priceSell":  {
+                                                                                                          "type":  "number",
+                                                                                                          "format":  "double"
+                                                                                                      },
+                                                                                        "name":  {
+                                                                                                     "type":  "string"
+                                                                                                 },
+                                                                                        "id":  {
+                                                                                                   "type":  "string",
+                                                                                                   "format":  "uuid"
+                                                                                               }
+                                                                                    }
+                                                                 }
+                                   }
+                   }
+}
