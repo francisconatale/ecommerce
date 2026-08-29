@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class CategoryService {
     
@@ -26,6 +29,7 @@ public class CategoryService {
 
     @Transactional
     public Category create(String name, UUID parentId) {
+        log.info("Creando nueva categoría: {} con parentId: {}", name, parentId);
         Category category = new Category();
         category.setId(UUID.randomUUID());
         category.setName(name);
@@ -43,11 +47,14 @@ public class CategoryService {
         category.setPathNames(pathNames);
         categoryRepository.save(category);
         closureRepository.insertNodeIntoTree(category.getId(), hasParent ? parentId : category.getId());
+        
+        log.info("Categoría creada exitosamente con ID: {}", category.getId());
         return category;
     }
 
     @Transactional
     public void assignProduct(UUID productId, UUID categoryId) {
+        log.info("Asignando producto {} a categoría {}", productId, categoryId);
         Category category = categoryRepository.findById(categoryId)
             .orElseThrow(() -> new IllegalArgumentException("Category not found"));
         
@@ -56,6 +63,7 @@ public class CategoryService {
         
         product.setCategoryId(categoryId);
         productRepository.save(product);
+        log.info("Producto {} asignado exitosamente a categoría {}", productId, categoryId);
     }
 
     /**
@@ -68,10 +76,12 @@ public class CategoryService {
      */
     public void validateMove(UUID nodeId, UUID newParentId, boolean isNewParentDescendant, int projectedDepth) {
         if (isNewParentDescendant) {
+            log.warn("Movimiento inválido: ciclo detectado para nodeId {}", nodeId);
             throw new IllegalArgumentException("Invalid move: cycle detected. Cannot move a category to its own descendant.");
         }
         
         if (projectedDepth > MAX_DEPTH) {
+            log.warn("Movimiento inválido: profundidad proyectada {} excede MAX_DEPTH", projectedDepth);
             throw new IllegalArgumentException("Invalid move: exceeds maximum depth of " + MAX_DEPTH + " levels.");
         }
     }
@@ -89,20 +99,24 @@ public class CategoryService {
 
     @Transactional
     public void delete(UUID categoryId) {
+        log.info("Iniciando borrado de categoría {}", categoryId);
         Category category = categoryRepository.findById(categoryId)
             .orElseThrow(() -> new IllegalArgumentException("Category not found"));
             
         if (category.isSystem()) {
+            log.error("Intento de borrar categoría del sistema: {}", categoryId);
             throw new IllegalArgumentException("Cannot delete a system category");
         }
 
         UUID parentId = determineNewParentForChildren(category.getParentId());
         
+        log.info("Reasignando hijos y productos de la categoría {} a su padre {}", categoryId, parentId);
         reparentChildrenAndUpdatePaths(categoryId, parentId, category.getName());
         reparentProducts(categoryId, parentId);
         updateClosureTree(categoryId);
         
         categoryRepository.delete(category);
+        log.info("Categoría {} borrada exitosamente (soft delete)", categoryId);
     }
 
     private void reparentChildrenAndUpdatePaths(UUID categoryId, UUID newParentId, String deletedCategoryName) {

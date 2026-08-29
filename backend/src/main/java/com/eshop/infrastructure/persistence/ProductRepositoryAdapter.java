@@ -9,6 +9,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class ProductRepositoryAdapter implements ProductRepository {
 
@@ -20,11 +23,13 @@ public class ProductRepositoryAdapter implements ProductRepository {
 
     @Override
     public Optional<Product> findById(UUID id) {
+        log.debug("Buscando producto por ID en DB: {}", id);
         return repository.findById(id).map(this::toDomain);
     }
 
     @Override
     public Product save(Product product) {
+        log.debug("Guardando producto en DB: {}", product.getName());
         ProductEntity entity = toEntity(product);
         entity = repository.save(entity);
         return toDomain(entity);
@@ -32,6 +37,7 @@ public class ProductRepositoryAdapter implements ProductRepository {
 
     @Override
     public List<Product> findByCategoryId(UUID categoryId) {
+        log.debug("Buscando productos por categoría en DB: {}", categoryId);
         return repository.findByCategoryId(categoryId).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());

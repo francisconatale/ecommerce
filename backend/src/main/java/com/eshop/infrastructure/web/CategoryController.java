@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/api")
 public class CategoryController {
@@ -21,19 +24,23 @@ public class CategoryController {
 
     @PostMapping("/categories")
     public void createCategory(@RequestBody Category category) {
-        // En un proyecto final esto usaría DTOs en lugar de la clase de dominio directo.
+        log.info("Recibida petición POST para crear categoría: {}", category.getName());
         categoryService.create(category.getName(), category.getParentId());
+        log.info("Petición POST procesada exitosamente para categoría: {}", category.getName());
     }
 
     @PutMapping("/products/{productId}/category/{categoryId}")
     public void assignProductToCategory(@PathVariable UUID productId, @PathVariable UUID categoryId) {
-        // T012: Assign product to leaf category
+        log.info("Recibida petición PUT para asignar producto {} a categoría {}", productId, categoryId);
         categoryService.assignProduct(productId, categoryId);
     }
 
     // T015: Endpoint to discover products efficiently without N+1
     @GetMapping("/categories/{id}/products")
     public List<ProductWithBreadcrumb> getProductsByCategory(@PathVariable UUID id) {
-        return productRepository.findProductsByCategoryDescendantsWithBreadcrumb(id);
+        log.info("Recibida petición GET para obtener productos de la categoría {}", id);
+        List<ProductWithBreadcrumb> result = productRepository.findProductsByCategoryDescendantsWithBreadcrumb(id);
+        log.info("Retornando {} productos para la categoría {}", result.size(), id);
+        return result;
     }
 }
