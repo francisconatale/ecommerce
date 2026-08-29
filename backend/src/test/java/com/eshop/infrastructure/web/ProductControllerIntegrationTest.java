@@ -60,8 +60,8 @@ public class ProductControllerIntegrationTest {
         mockMvc.perform(post("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Integration Test Product"));
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.name").value("Integration Test Product"));
     }
 
     @Test
@@ -70,7 +70,7 @@ public class ProductControllerIntegrationTest {
         Product product = productService.create("To Be Deleted Product", BigDecimal.ONE, BigDecimal.TEN, category.getId());
         
         mockMvc.perform(delete("/api/products/" + product.getId()))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
                 
         // Verification: It shouldn't be found in findAll
         boolean exists = productService.findAll().stream().anyMatch(p -> p.getId().equals(product.getId()));

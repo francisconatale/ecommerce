@@ -46,8 +46,8 @@ public class CategoryControllerIntegrationTest {
         mockMvc.perform(post("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Initial Name"));
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.name").value("Initial Name"));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class CategoryControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Updated Name"));
+                .andExpect(jsonPath("$.data.name").value("Updated Name"));
                 
         Category updated = categoryService.findAll().stream().filter(c -> c.getId().equals(created.getId())).findFirst().get();
         assertThat(updated.getName()).isEqualTo("Updated Name");
@@ -68,12 +68,13 @@ public class CategoryControllerIntegrationTest {
 
     @Test
     void shouldDeleteCategory() throws Exception {
-        Category category = categoryService.create("To Be Deleted", null);
+        Category parent = categoryService.create("Parent", null);
+        Category child = categoryService.create("Child", parent.getId());
         
-        mockMvc.perform(delete("/api/categories/" + category.getId()))
-                .andExpect(status().isOk());
+        mockMvc.perform(delete("/api/categories/" + child.getId()))
+                .andExpect(status().isNoContent());
                 
-        boolean exists = categoryService.findAll().stream().anyMatch(c -> c.getId().equals(category.getId()));
+        boolean exists = categoryService.findAll().stream().anyMatch(c -> c.getId().equals(child.getId()));
         assertThat(exists).isFalse();
     }
 }

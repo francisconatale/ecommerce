@@ -1,12 +1,16 @@
 package com.eshop.infrastructure.web;
 
 import com.eshop.domain.category.CategoryService;
+import com.eshop.infrastructure.web.dto.ApiResponse;
 import com.eshop.infrastructure.web.dto.CategoryRequest;
 import com.eshop.infrastructure.web.dto.CategoryResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -20,28 +24,38 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public CategoryResponse createCategory(@RequestBody CategoryRequest request) {
+    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@RequestBody CategoryRequest request) {
         log.info("Recibida petición POST para crear categoría: {}", request.name());
-        return CategoryResponse.fromDomain(categoryService.create(request.name(), request.parentId()));
+        CategoryResponse response = CategoryResponse.fromDomain(categoryService.create(request.name(), request.parentId()));
+        return ResponseEntity
+                .created(URI.create("/api/categories/" + response.id()))
+                .body(ApiResponse.success(response));
     }
 
     @GetMapping
-    public List<CategoryResponse> getAllCategories() {
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
         log.info("Recibida petición GET para obtener todas las categorías");
-        return categoryService.findAll().stream()
+        List<CategoryResponse> categories = categoryService.findAll().stream()
                 .map(CategoryResponse::fromDomain)
                 .collect(Collectors.toList());
+                
+        if (categories.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        return ResponseEntity.ok(ApiResponse.success(categories));
     }
 
     @PutMapping("/{id}")
-    public CategoryResponse updateCategory(@PathVariable UUID id, @RequestBody CategoryRequest request) {
+    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(@PathVariable UUID id, @RequestBody CategoryRequest request) {
         log.info("Recibida petición PUT para actualizar categoría {}", id);
-        return CategoryResponse.fromDomain(categoryService.update(id, request.name(), request.parentId()));
+        CategoryResponse response = CategoryResponse.fromDomain(categoryService.update(id, request.name(), request.parentId()));
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteCategory(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
         log.info("Recibida petición DELETE para borrar categoría {}", id);
         categoryService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
