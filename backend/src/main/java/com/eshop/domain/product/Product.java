@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,5 +19,6 @@ public class Product {
     private BigDecimal priceBuy;
     private BigDecimal priceSell;
     private UUID categoryId;
+    
     private boolean deleted;
 }

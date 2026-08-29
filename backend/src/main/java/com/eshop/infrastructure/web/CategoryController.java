@@ -1,64 +1,47 @@
 package com.eshop.infrastructure.web;
 
-import com.eshop.domain.category.Category;
 import com.eshop.domain.category.CategoryService;
-import com.eshop.infrastructure.persistence.SpringDataProductRepository;
-import com.eshop.infrastructure.persistence.SpringDataProductRepository.ProductWithBreadcrumb;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.eshop.infrastructure.web.dto.CategoryRequest;
+import com.eshop.infrastructure.web.dto.CategoryResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.UUID;
-
-import lombok.extern.slf4j.Slf4j;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/categories")
+@RequiredArgsConstructor
 public class CategoryController {
 
-    @Autowired
-    private SpringDataProductRepository productRepository;
+    private final CategoryService categoryService;
 
-    @Autowired
-    private CategoryService categoryService;
-
-    @PostMapping("/categories")
-    public void createCategory(@RequestBody Category category) {
-        log.info("Recibida petición POST para crear categoría: {}", category.getName());
-        categoryService.create(category.getName(), category.getParentId());
-        log.info("Petición POST procesada exitosamente para categoría: {}", category.getName());
+    @PostMapping
+    public CategoryResponse createCategory(@RequestBody CategoryRequest request) {
+        log.info("Recibida petición POST para crear categoría: {}", request.name());
+        return CategoryResponse.fromDomain(categoryService.create(request.name(), request.parentId()));
     }
 
-    @GetMapping("/categories")
-    public List<Category> getAllCategories() {
+    @GetMapping
+    public List<CategoryResponse> getAllCategories() {
         log.info("Recibida petición GET para obtener todas las categorías");
-        return categoryService.findAll();
+        return categoryService.findAll().stream()
+                .map(CategoryResponse::fromDomain)
+                .collect(Collectors.toList());
     }
 
-    @PutMapping("/categories/{id}")
-    public Category updateCategory(@PathVariable UUID id, @RequestBody Category category) {
+    @PutMapping("/{id}")
+    public CategoryResponse updateCategory(@PathVariable UUID id, @RequestBody CategoryRequest request) {
         log.info("Recibida petición PUT para actualizar categoría {}", id);
-        return categoryService.update(id, category.getName(), category.getParentId());
+        return CategoryResponse.fromDomain(categoryService.update(id, request.name(), request.parentId()));
     }
 
-    @DeleteMapping("/categories/{id}")
+    @DeleteMapping("/{id}")
     public void deleteCategory(@PathVariable UUID id) {
         log.info("Recibida petición DELETE para borrar categoría {}", id);
         categoryService.delete(id);
-    }
-
-    @PutMapping("/products/{productId}/category/{categoryId}")
-    public void assignProductToCategory(@PathVariable UUID productId, @PathVariable UUID categoryId) {
-        log.info("Recibida petición PUT para asignar producto {} a categoría {}", productId, categoryId);
-        categoryService.assignProduct(productId, categoryId);
-    }
-
-    // T015: Endpoint to discover products efficiently without N+1
-    @GetMapping("/categories/{id}/products")
-    public List<ProductWithBreadcrumb> getProductsByCategory(@PathVariable UUID id) {
-        log.info("Recibida petición GET para obtener productos de la categoría {}", id);
-        List<ProductWithBreadcrumb> result = productRepository.findProductsByCategoryDescendantsWithBreadcrumb(id);
-        log.info("Retornando {} productos para la categoría {}", result.size(), id);
-        return result;
     }
 }

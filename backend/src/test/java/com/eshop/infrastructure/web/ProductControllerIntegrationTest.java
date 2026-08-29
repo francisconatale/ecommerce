@@ -5,6 +5,7 @@ import com.eshop.domain.product.Product;
 import com.eshop.domain.category.Category;
 import com.eshop.domain.category.CategoryService;
 import com.eshop.domain.product.ProductService;
+import com.eshop.infrastructure.web.dto.ProductRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,15 +50,16 @@ public class ProductControllerIntegrationTest {
     void shouldCreateProduct() throws Exception {
         Category category = categoryService.create("Product Category", null);
         
-        Product product = new Product();
-        product.setName("Integration Test Product");
-        product.setPriceBuy(BigDecimal.valueOf(10.5));
-        product.setPriceSell(BigDecimal.valueOf(20.0));
-        product.setCategoryId(category.getId());
+        ProductRequest request = new ProductRequest(
+            "Integration Test Product",
+            BigDecimal.valueOf(10.5),
+            BigDecimal.valueOf(20.0),
+            category.getId()
+        );
         
         mockMvc.perform(post("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(product)))
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Integration Test Product"));
     }
