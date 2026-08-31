@@ -7,6 +7,11 @@ import com.eshop.domain.product.ProductRepository;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 import java.util.List;
+import com.eshop.domain.exception.BusinessException;
+import com.eshop.domain.exception.ResourceNotFoundException;
+import com.eshop.domain.exception.CircularDependencyException;
+import com.eshop.domain.exception.MaxDepthExceededException;
+import com.eshop.domain.exception.SystemCategoryImmutableException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,8 +44,7 @@ public class CategoryService {
         boolean hasParent = parentId != null;
         String pathNames = name;
         if (hasParent) {
-            Category parent = categoryRepository.findById(parentId)
-                .orElseThrow(() -> new IllegalArgumentException("Parent category not found"));
+            Category parent = getCategoryOrThrow(parentId);
             pathNames = parent.getPathNames() + PATH_SEPARATOR + name;
         }
 
@@ -61,105 +65,108 @@ public class CategoryService {
     @Transactional
     public Category update(UUID categoryId, String newName, UUID newParentId) {
         log.info("Actualizando categoría {}: nuevo nombre='{}', nuevo parentId='{}'", categoryId, newName, newParentId);
-        Category category = categoryRepository.findById(categoryId)
-            .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+        Category category = getCategoryOrThrow(categoryId);
+        validateNotSystemCategory(category);
 
-        if (category.isSystem()) {
-            throw new IllegalArgumentException("Cannot update a system category");
-        }
-
-        String oldName = category.getName();
         String oldPath = category.getPathNames();
-        
-        boolean nameChanged = newName != null && !newName.trim().isEmpty() && !oldName.equals(newName);
-        boolean parentChanged = (newParentId != null && !newParentId.equals(category.getParentId())) || 
-                                (newParentId == null && category.getParentId() != null);
-
-        if (nameChanged) {
-            category.setName(newName);
-        }
-
-        if (parentChanged) {
-            if (newParentId != null) {
-                boolean isDescendant = closureRepository.isDescendant(categoryId, newParentId);
-                validateMove(categoryId, newParentId, isDescendant, 0); // Skipping depth validation for MVP
-            }
-            
-            // Re-parent in closure table
-            closureRepository.disconnectSubtree(categoryId);
-            if (newParentId != null) {
-                closureRepository.connectSubtree(categoryId, newParentId);
-            }
-            category.setParentId(newParentId);
-        }
+        boolean nameChanged = updateNameIfChanged(category, newName);
+        boolean parentChanged = updateParentIfChanged(category, newParentId);
 
         if (nameChanged || parentChanged) {
-            String newPath = category.getName();
-            if (category.getParentId() != null) {
-                Category parent = categoryRepository.findById(category.getParentId())
-                    .orElseThrow(() -> new IllegalArgumentException("New parent not found"));
-                newPath = parent.getPathNames() + PATH_SEPARATOR + category.getName();
-            }
-            category.setPathNames(newPath);
-            categoryRepository.save(category);
-
-            // Update all descendants' paths
-            List<Category> descendants = categoryRepository.findDescendants(categoryId);
-            for (Category desc : descendants) {
-                if (desc.getPathNames() != null && oldPath != null && desc.getPathNames().startsWith(oldPath)) {
-                    String updatedDescPath = newPath + desc.getPathNames().substring(oldPath.length());
-                    desc.setPathNames(updatedDescPath);
-                    categoryRepository.save(desc);
-                }
-            }
-        } else {
-            categoryRepository.save(category);
+            updatePathsForCategoryAndDescendants(category, oldPath);
         }
 
-        return category;
+        return categoryRepository.save(category);
+    }
+
+    private Category getCategoryOrThrow(UUID categoryId) {
+        return categoryRepository.findById(categoryId)
+            .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
+    }
+
+    private void validateNotSystemCategory(Category category) {
+        if (category.isSystem()) {
+            throw new SystemCategoryImmutableException("Cannot update a system category");
+        }
+    }
+
+    private boolean updateNameIfChanged(Category category, String newName) {
+        if (!category.getName().equals(newName)) {
+            category.setName(newName);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean updateParentIfChanged(Category category, UUID newParentId) {
+        if (java.util.Objects.equals(category.getParentId(), newParentId)) {
+            return false;
+        }
+
+        if (newParentId != null) {
+            boolean isDescendant = closureRepository.isDescendant(category.getId(), newParentId);
+            validateMove(category.getId(), newParentId, isDescendant, 0);
+        }
+        
+        closureRepository.disconnectSubtree(category.getId());
+        if (newParentId != null) {
+            closureRepository.connectSubtree(category.getId(), newParentId);
+        }
+        category.setParentId(newParentId);
+        
+        return true;
+    }
+
+    private void updatePathsForCategoryAndDescendants(Category category, String oldPath) {
+        String newPath = calculateNewPath(category);
+        category.setPathNames(newPath);
+        
+        List<Category> descendants = categoryRepository.findDescendants(category.getId());
+        for (Category desc : descendants) {
+            if (desc.getPathNames() != null && oldPath != null && desc.getPathNames().startsWith(oldPath)) {
+                String updatedDescPath = newPath + desc.getPathNames().substring(oldPath.length());
+                desc.setPathNames(updatedDescPath);
+                categoryRepository.save(desc);
+            }
+        }
+    }
+
+    private String calculateNewPath(Category category) {
+        if (category.getParentId() == null) {
+            return category.getName();
+        }
+        Category parent = getCategoryOrThrow(category.getParentId());
+        return parent.getPathNames() + PATH_SEPARATOR + category.getName();
     }
 
     @Transactional
     public void assignProduct(UUID productId, UUID categoryId) {
         log.info("Asignando producto {} a categoría {}", productId, categoryId);
-        Category category = categoryRepository.findById(categoryId)
-            .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+        Category category = getCategoryOrThrow(categoryId);
+        Product product = getProductOrThrow(productId);
         
-        Product product = productRepository.findById(productId)
-            .orElseThrow(() -> new IllegalArgumentException("Product not found"));
-        
-        product.setCategoryId(categoryId);
+        product.setCategoryId(category.getId());
         productRepository.save(product);
         log.info("Producto {} asignado exitosamente a categoría {}", productId, categoryId);
     }
 
-    /**
-     * Validates if a move operation is legal.
-     * 
-     * @param nodeId The category being moved
-     * @param newParentId The target parent category
-     * @param isNewParentDescendant True if the database indicates newParentId is a descendant of nodeId
-     * @param projectedDepth The calculated depth of the deepest node in the moved subtree after the move
-     */
+    private Product getProductOrThrow(UUID productId) {
+        return productRepository.findById(productId)
+            .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
+    }
+
     public void validateMove(UUID nodeId, UUID newParentId, boolean isNewParentDescendant, int projectedDepth) {
         if (isNewParentDescendant) {
             log.warn("Movimiento inválido: ciclo detectado para nodeId {}", nodeId);
-            throw new IllegalArgumentException("Invalid move: cycle detected. Cannot move a category to its own descendant.");
+            throw new CircularDependencyException("Invalid move: cycle detected. Cannot move a category to its own descendant.");
         }
         
         if (projectedDepth > MAX_DEPTH) {
             log.warn("Movimiento inválido: profundidad proyectada {} excede MAX_DEPTH", projectedDepth);
-            throw new IllegalArgumentException("Invalid move: exceeds maximum depth of " + MAX_DEPTH + " levels.");
+            throw new MaxDepthExceededException(MAX_DEPTH);
         }
     }
-
-    /**
-     * Determines the new parent ID for children and products when a category is deleted.
-     * According to our Domain rules, they inherit the grandparent (the deleted category's parent).
-     * 
-     * @param deletedCategoryParentId The parentId of the category being deleted
-     * @return The new parentId for the orphans
-     */
+    
     public UUID determineNewParentForChildren(UUID deletedCategoryParentId) {
         return deletedCategoryParentId;
     }
@@ -167,13 +174,8 @@ public class CategoryService {
     @Transactional
     public void delete(UUID categoryId) {
         log.info("Iniciando borrado de categoría {}", categoryId);
-        Category category = categoryRepository.findById(categoryId)
-            .orElseThrow(() -> new IllegalArgumentException("Category not found"));
-            
-        if (category.isSystem()) {
-            log.error("Intento de borrar categoría del sistema: {}", categoryId);
-            throw new IllegalArgumentException("Cannot delete a system category");
-        }
+        Category category = getCategoryOrThrow(categoryId);
+        validateNotSystemCategory(category);
 
         UUID parentId = determineNewParentForChildren(category.getParentId());
         

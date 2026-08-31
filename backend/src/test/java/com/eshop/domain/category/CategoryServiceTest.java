@@ -14,6 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+import com.eshop.domain.exception.CircularDependencyException;
+import com.eshop.domain.exception.ResourceNotFoundException;
+import com.eshop.domain.exception.SystemCategoryImmutableException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
@@ -141,5 +145,48 @@ public class CategoryServiceTest {
 
         assertEquals(grandparent.getId(), up1.getCategoryId());
         assertEquals(grandparent.getId(), up2.getCategoryId());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUpdatingSystemCategory() {
+        Category systemCategory = new Category();
+        systemCategory.setId(UUID.randomUUID());
+        systemCategory.setName("System");
+        systemCategory.setSystem(true);
+        categoryRepository.save(systemCategory);
+
+        assertThrows(SystemCategoryImmutableException.class, () -> {
+            service.update(systemCategory.getId(), "New Name", null);
+        });
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDeletingSystemCategory() {
+        Category systemCategory = new Category();
+        systemCategory.setId(UUID.randomUUID());
+        systemCategory.setName("System");
+        systemCategory.setSystem(true);
+        categoryRepository.save(systemCategory);
+
+        assertThrows(SystemCategoryImmutableException.class, () -> {
+            service.delete(systemCategory.getId());
+        });
+    }
+
+    @Test
+    void shouldThrowCircularDependencyExceptionWhenMovingToDescendant() {
+        Category parent = service.create("Parent", null);
+        Category child = service.create("Child", parent.getId());
+
+        assertThrows(CircularDependencyException.class, () -> {
+            service.update(parent.getId(), "Parent", child.getId());
+        });
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenCategoryDoesNotExist() {
+        assertThrows(ResourceNotFoundException.class, () -> {
+            service.update(UUID.randomUUID(), "Non-existent", null);
+        });
     }
 }

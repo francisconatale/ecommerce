@@ -36,4 +36,6 @@ build/
 specs/
 .mvn/
 mvnw
-mvnw.cmd
+mvnw.cmd*.class
+*.jar
+.gradle/

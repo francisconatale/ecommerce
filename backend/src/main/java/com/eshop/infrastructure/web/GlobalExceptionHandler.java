@@ -13,16 +13,45 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(com.eshop.domain.exception.ResourceNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResourceNotFoundException(com.eshop.domain.exception.ResourceNotFoundException ex) {
+        log.warn("Resource not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(com.eshop.domain.exception.CircularDependencyException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCircularDependencyException(com.eshop.domain.exception.CircularDependencyException ex) {
+        log.warn("Circular dependency: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(com.eshop.domain.exception.SystemCategoryImmutableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleSystemCategoryImmutableException(com.eshop.domain.exception.SystemCategoryImmutableException ex) {
+        log.warn("System category immutable: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(com.eshop.domain.exception.MaxDepthExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxDepthExceededException(com.eshop.domain.exception.MaxDepthExceededException ex) {
+        log.warn("Max depth exceeded: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(com.eshop.domain.exception.ResourceDuplicatedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResourceDuplicatedException(com.eshop.domain.exception.ResourceDuplicatedException ex) {
+        log.warn("Resource duplicated: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(com.eshop.domain.exception.BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(com.eshop.domain.exception.BusinessException ex) {
+        log.warn("Business validation error: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(ex.getMessage()));
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException ex) {
-        log.warn("Business validation error: {}", ex.getMessage());
-        String msg = ex.getMessage().toLowerCase();
-        if (msg.contains("not found")) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
-        }
-        if (msg.contains("cycle") || msg.contains("system category")) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
-        }
+        log.warn("Validation error: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(ex.getMessage()));
     }
 

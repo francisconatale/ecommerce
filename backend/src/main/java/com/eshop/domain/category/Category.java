@@ -1,21 +1,26 @@
-package com.eshop.domain.category;
+﻿package com.eshop.domain.category;
 
+import com.eshop.domain.base.BaseEntity;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
 
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class Category {
-    private UUID id;
+public class Category extends BaseEntity {
     private String name;
     private UUID parentId;
     private boolean isSystem;
     private String pathNames;
-    private boolean deleted;    
+    
+    public Category(UUID id, String name, UUID parentId, boolean isSystem, String pathNames, boolean deleted) {
+        this.setId(id);
+        this.name = name;
+        this.parentId = parentId;
+        this.isSystem = isSystem;
+        this.pathNames = pathNames;
+        this.setDeleted(deleted);
+    }
 }
