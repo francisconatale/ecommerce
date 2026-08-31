@@ -1,4 +1,4 @@
-package C:.Users.franc.OneDrive.Desktop.prototype-eshop.backend.src.test.java.com.eshop.domain.category;
+package com.eshop.domain.category;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

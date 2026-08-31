@@ -1,9 +1,9 @@
-package C:.Users.franc.OneDrive.Desktop.prototype-eshop.backend.src.test.java.com.eshop.domain.category;
+package com.eshop.domain.category;
 
 import com.eshop.TestcontainersConfiguration;
 import com.eshop.domain.product.Product;
 import com.eshop.domain.product.ProductRepository;
-import com.eshop.infrastructure.persistence.SpringDataCategoryClosureRepository;
+import com.eshop.infrastructure.persistence.category.SpringDataCategoryClosureRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +42,11 @@ public class CategoryServiceTest {
         Category child = service.create("Child", root.getId());
 
         Product product = new Product();
-        product.setId(UUID.randomUUID());
         product.setName("Prod");
         product.setPriceBuy(BigDecimal.ZERO);
         product.setPriceSell(BigDecimal.ZERO);
         product.setCategoryId(root.getId());
-        productRepository.save(product);
+        product = productRepository.save(product);
 
         service.delete(root.getId());
 
@@ -69,12 +68,11 @@ public class CategoryServiceTest {
         Category leaf = service.create("Leaf", middle.getId());
 
         Product product = new Product();
-        product.setId(UUID.randomUUID());
         product.setName("Prod");
         product.setPriceBuy(BigDecimal.ZERO);
         product.setPriceSell(BigDecimal.ZERO);
         product.setCategoryId(middle.getId());
-        productRepository.save(product);
+        product = productRepository.save(product);
 
         service.delete(middle.getId());
 
@@ -95,12 +93,11 @@ public class CategoryServiceTest {
         Category leaf = service.create("Leaf", middle.getId());
 
         Product product = new Product();
-        product.setId(UUID.randomUUID());
         product.setName("Prod");
         product.setPriceBuy(BigDecimal.ZERO);
         product.setPriceSell(BigDecimal.ZERO);
         product.setCategoryId(leaf.getId());
-        productRepository.save(product);
+        product = productRepository.save(product);
 
         service.delete(leaf.getId());
 
@@ -134,10 +131,10 @@ public class CategoryServiceTest {
         Category grandparent = service.create("Grandparent", null);
         Category parent = service.create("Parent", grandparent.getId());
 
-        Product p1 = new Product(); p1.setId(UUID.randomUUID()); p1.setName("p1"); p1.setPriceBuy(BigDecimal.ZERO); p1.setPriceSell(BigDecimal.ZERO); p1.setCategoryId(parent.getId());
-        Product p2 = new Product(); p2.setId(UUID.randomUUID()); p2.setName("p2"); p2.setPriceBuy(BigDecimal.ZERO); p2.setPriceSell(BigDecimal.ZERO); p2.setCategoryId(parent.getId());
-        productRepository.save(p1);
-        productRepository.save(p2);
+        Product p1 = new Product(); p1.setName("p1"); p1.setPriceBuy(BigDecimal.ZERO); p1.setPriceSell(BigDecimal.ZERO); p1.setCategoryId(parent.getId());
+        Product p2 = new Product(); p2.setName("p2"); p2.setPriceBuy(BigDecimal.ZERO); p2.setPriceSell(BigDecimal.ZERO); p2.setCategoryId(parent.getId());
+        p1 = productRepository.save(p1);
+        p2 = productRepository.save(p2);
 
         service.delete(parent.getId());
 
@@ -151,26 +148,24 @@ public class CategoryServiceTest {
     @Test
     void shouldThrowExceptionWhenUpdatingSystemCategory() {
         Category systemCategory = new Category();
-        systemCategory.setId(UUID.randomUUID());
         systemCategory.setName("System");
         systemCategory.setSystem(true);
-        categoryRepository.save(systemCategory);
+        Category savedSystemCategory = categoryRepository.save(systemCategory);
 
         assertThrows(SystemCategoryImmutableException.class, () -> {
-            service.update(systemCategory.getId(), "New Name", null);
+            service.update(savedSystemCategory.getId(), "New Name", null);
         });
     }
 
     @Test
     void shouldThrowExceptionWhenDeletingSystemCategory() {
         Category systemCategory = new Category();
-        systemCategory.setId(UUID.randomUUID());
         systemCategory.setName("System");
         systemCategory.setSystem(true);
-        categoryRepository.save(systemCategory);
+        Category savedSystemCategory = categoryRepository.save(systemCategory);
 
         assertThrows(SystemCategoryImmutableException.class, () -> {
-            service.delete(systemCategory.getId());
+            service.delete(savedSystemCategory.getId());
         });
     }
 

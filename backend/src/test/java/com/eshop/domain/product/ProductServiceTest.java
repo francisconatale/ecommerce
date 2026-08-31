@@ -1,4 +1,4 @@
-package C:.Users.franc.OneDrive.Desktop.prototype-eshop.backend.src.test.java.com.eshop.domain.product;
+package com.eshop.domain.product;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -14,4 +14,8 @@ public abstract class BaseEntity {
     private boolean deleted;
 
     protected BaseEntity() {}
+
+    public boolean isNew() {
+        return id == null;
+    }
 }

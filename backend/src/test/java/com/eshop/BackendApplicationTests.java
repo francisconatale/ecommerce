@@ -1,4 +1,4 @@
-package C:.Users.franc.OneDrive.Desktop.prototype-eshop.backend.src.test.java.com.eshop;
+package com.eshop;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

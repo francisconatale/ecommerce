@@ -1,4 +1,4 @@
-package C:.Users.franc.OneDrive.Desktop.prototype-eshop.backend.src.test.java.com.eshop;
+package com.eshop;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;

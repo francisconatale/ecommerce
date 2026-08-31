@@ -1,4 +1,4 @@
-package C:.Users.franc.OneDrive.Desktop.prototype-eshop.backend.src.test.java.com.eshop.application;
+package com.eshop.application;
 
 import com.eshop.TestcontainersConfiguration;
 import com.eshop.domain.category.Category;
@@ -58,10 +58,10 @@ public class CategoryServiceIntegrationTest {
         Category laptops = categoryService.create("Laptops", electronics.getId());
         Category gamingLaptops = categoryService.create("Gaming Laptops", laptops.getId());
 
-        productRepository.save(new Product(UUID.randomUUID(), "Generic Wire", BigDecimal.TEN, BigDecimal.TEN, electronics.getId(), false));
-        productRepository.save(new Product(UUID.randomUUID(), "iPhone", BigDecimal.TEN, BigDecimal.TEN, phones.getId(), false));
-        productRepository.save(new Product(UUID.randomUUID(), "MacBook", BigDecimal.TEN, BigDecimal.TEN, laptops.getId(), false));
-        productRepository.save(new Product(UUID.randomUUID(), "Alienware", BigDecimal.TEN, BigDecimal.TEN, gamingLaptops.getId(), false));
+        productRepository.save(new Product("Generic Wire", BigDecimal.TEN, BigDecimal.TEN, electronics.getId()));
+        productRepository.save(new Product("iPhone", BigDecimal.TEN, BigDecimal.TEN, phones.getId()));
+        productRepository.save(new Product("MacBook", BigDecimal.TEN, BigDecimal.TEN, laptops.getId()));
+        productRepository.save(new Product("Alienware", BigDecimal.TEN, BigDecimal.TEN, gamingLaptops.getId()));
 
         // Act
         List<Product> electronicsProducts = productRepository.findByCategoryAndDescendants(electronics.getId());
@@ -80,8 +80,8 @@ public class CategoryServiceIntegrationTest {
         Category phones = categoryService.create("Phones", electronics.getId());
         Category laptops = categoryService.create("Laptops", electronics.getId());
 
-        productRepository.save(new Product(UUID.randomUUID(), "iPhone", BigDecimal.TEN, BigDecimal.TEN, phones.getId(), false));
-        productRepository.save(new Product(UUID.randomUUID(), "MacBook", BigDecimal.TEN, BigDecimal.TEN, laptops.getId(), false));
+        productRepository.save(new Product("iPhone", BigDecimal.TEN, BigDecimal.TEN, phones.getId()));
+        productRepository.save(new Product("MacBook", BigDecimal.TEN, BigDecimal.TEN, laptops.getId()));
 
         // Act
         List<Product> phonesProducts = productRepository.findByCategoryAndDescendants(phones.getId());

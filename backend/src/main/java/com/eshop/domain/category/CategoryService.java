@@ -35,9 +35,8 @@ public class CategoryService {
 
     @Transactional
     public Category create(String name, UUID parentId) {
-        log.info("Creando nueva categorÃƒÂ­a: {} con parentId: {}", name, parentId);
+        log.info("Creando nueva categoría: {} con parentId: {}", name, parentId);
         Category category = new Category();
-        category.setId(UUID.randomUUID());
         category.setName(name);
         category.setParentId(parentId);
         category.setSystem(false);
@@ -50,10 +49,10 @@ public class CategoryService {
         }
 
         category.setPathNames(pathNames);
-        categoryRepository.save(category);
+        category = categoryRepository.save(category);
         closureRepository.insertNodeIntoTree(category.getId(), hasParent ? parentId : category.getId());
         
-        log.info("CategorÃƒÂ­a creada exitosamente con ID: {}", category.getId());
+        log.info("Categoría creada exitosamente con ID: {}", category.getId());
         return category;
     }
 

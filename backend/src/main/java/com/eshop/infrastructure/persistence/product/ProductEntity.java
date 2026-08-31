@@ -1,15 +1,11 @@
 package com.eshop.infrastructure.persistence.product;
-import com.eshop.infrastructure.persistence.base.JpaBaseEntity;
-import com.eshop.infrastructure.persistence.base.JpaBaseEntity;
 
+import com.eshop.infrastructure.persistence.base.JpaBaseEntity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
-
 import lombok.Getter;
 import lombok.Setter;
-
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -19,9 +15,8 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction("deleted = false")
 @Getter
 @Setter
-public class ProductEntity {
-    @Id
-    private UUID id;
+public class ProductEntity extends JpaBaseEntity {
+    
     private String name;
     
     @Column(name = "price_buy")
@@ -32,23 +27,4 @@ public class ProductEntity {
     
     @Column(name = "category_id")
     private UUID categoryId;
-    
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-    
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-    
-    private boolean deleted;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

@@ -16,78 +16,59 @@ import lombok.extern.slf4j.Slf4j;
 public class ProductRepositoryAdapter implements ProductRepository {
 
     private final SpringDataProductRepository repository;
+    private final ProductMapper mapper;
 
-    public ProductRepositoryAdapter(SpringDataProductRepository repository) {
+    public ProductRepositoryAdapter(SpringDataProductRepository repository, ProductMapper mapper) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     @Override
     public Optional<Product> findById(UUID id) {
         log.debug("Buscando producto por ID en DB: {}", id);
-        return repository.findById(id).map(this::toDomain);
+        return mapper.toDomain(repository.findById(id));
     }
 
     @Override
     public Product save(Product product) {
         log.debug("Guardando producto en DB: {}", product.getName());
-        ProductEntity entity = toEntity(product);
-        entity = repository.save(entity);
-        return toDomain(entity);
+        ProductEntity entity;
+        
+        if (product.isNew()) {
+            entity = mapper.toEntity(product);
+        } else {
+            entity = repository.findById(product.getId())
+                    .map(existing -> {
+                        mapper.updateEntity(product, existing);
+                        return existing;
+                    })
+                    .orElseGet(() -> mapper.toEntity(product));
+        }
+        
+        return mapper.toDomain(repository.save(entity));
     }
 
     @Override
     public List<Product> findByCategoryId(UUID categoryId) {
-        log.debug("Buscando productos por categorÃ­a en DB: {}", categoryId);
-        return repository.findByCategoryId(categoryId).stream()
-                .map(this::toDomain)
-                .collect(Collectors.toList());
+        log.debug("Buscando productos por categoría en DB: {}", categoryId);
+        return mapper.toDomain(repository.findByCategoryId(categoryId));
     }
 
     @Override
     public List<Product> findByCategoryAndDescendants(UUID categoryId) {
-        log.debug("Buscando productos de categorÃ­a y descendientes en DB: {}", categoryId);
-        return repository.findByCategoryAndDescendants(categoryId).stream()
-                .map(this::toDomain)
-                .collect(Collectors.toList());
+        log.debug("Buscando productos de categoría y descendientes en DB: {}", categoryId);
+        return mapper.toDomain(repository.findByCategoryAndDescendants(categoryId));
     }
 
     @Override
     public List<Product> findAll() {
         log.debug("Buscando todos los productos en DB");
-        return repository.findAll().stream()
-                .map(this::toDomain)
-                .collect(Collectors.toList());
+        return mapper.toDomain(repository.findAll());
     }
 
     @Override
     public void delete(Product product) {
         log.debug("Borrando producto en DB: {}", product.getId());
         repository.deleteById(product.getId());
-    }
-
-    private Product toDomain(ProductEntity entity) {
-        Product domain = new Product();
-        domain.setId(entity.getId());
-        domain.setName(entity.getName());
-        domain.setPriceBuy(entity.getPriceBuy());
-        domain.setPriceSell(entity.getPriceSell());
-        domain.setCategoryId(entity.getCategoryId());
-        return domain;
-    }
-
-    private ProductEntity toEntity(Product domain) {
-        ProductEntity entity = null;
-        if (domain.getId() != null) {
-            entity = repository.findById(domain.getId()).orElse(null);
-        }
-        if (entity == null) {
-            entity = new ProductEntity();
-            entity.setId(domain.getId() == null ? UUID.randomUUID() : domain.getId());
-        }
-        entity.setName(domain.getName());
-        entity.setPriceBuy(domain.getPriceBuy());
-        entity.setPriceSell(domain.getPriceSell());
-        entity.setCategoryId(domain.getCategoryId());
-        return entity;
     }
 }

@@ -1,4 +1,4 @@
-package C:.Users.franc.OneDrive.Desktop.prototype-eshop.backend.src.test.java.com.eshop.application;
+package com.eshop.application;
 
 import com.eshop.TestcontainersConfiguration;
 import com.eshop.domain.category.Category;
@@ -33,7 +33,7 @@ public class CategorizeProductUseCaseTest {
         Category root = categoryService.create("Electronics", null);
         Category leaf = categoryService.create("Smartphones", root.getId());
         
-        Product product = new Product(UUID.randomUUID(), "iPhone 15", BigDecimal.valueOf(800), BigDecimal.valueOf(1000), root.getId(), false);
+        Product product = new Product("iPhone 15", BigDecimal.valueOf(800), BigDecimal.valueOf(1000), root.getId());
         product = productRepository.save(product);
 
         // Act

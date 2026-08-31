@@ -17,71 +17,54 @@ public class CategoryRepositoryAdapter implements CategoryRepository {
 
     private final SpringDataCategoryRepository repository;
     private final SpringDataCategoryClosureRepository closureRepository;
+    private final CategoryMapper mapper;
 
-    public CategoryRepositoryAdapter(SpringDataCategoryRepository repository, SpringDataCategoryClosureRepository closureRepository) {
+    public CategoryRepositoryAdapter(SpringDataCategoryRepository repository, SpringDataCategoryClosureRepository closureRepository, CategoryMapper mapper) {
         this.repository = repository;
         this.closureRepository = closureRepository;
+        this.mapper = mapper;
     }
 
     @Override
     public Optional<Category> findById(UUID id) {
-        log.debug("Buscando categorÃ­a por ID en DB: {}", id);
-        return repository.findById(id).map(this::toDomain);
+        log.debug("Buscando categoría por ID en DB: {}", id);
+        return mapper.toDomain(repository.findById(id));
     }
 
     @Override
     public Category save(Category category) {
-        log.debug("Guardando categorÃ­a en DB: {}", category.getName());
-        CategoryEntity entity = toEntity(category);
-        entity = repository.save(entity);
-        return toDomain(entity);
+        log.debug("Guardando categoría en DB: {}", category.getName());
+        CategoryEntity entity;
+        
+        if (category.isNew()) {
+            entity = mapper.toEntity(category);
+        } else {
+            entity = repository.findById(category.getId())
+                    .map(existing -> {
+                        mapper.updateEntity(category, existing);
+                        return existing;
+                    })
+                    .orElseGet(() -> mapper.toEntity(category));
+        }
+        
+        return mapper.toDomain(repository.save(entity));
     }
 
     @Override
     public List<Category> findDescendants(UUID categoryId) {
-        log.debug("Buscando descendientes de categorÃ­a en DB: {}", categoryId);
-        return repository.findDescendants(categoryId).stream()
-                .map(this::toDomain)
-                .collect(Collectors.toList());
+        log.debug("Buscando descendientes de categoría en DB: {}", categoryId);
+        return mapper.toDomain(repository.findDescendants(categoryId));
     }
 
     @Override
     public List<Category> findAll() {
-        log.debug("Buscando todas las categorÃ­as en DB");
-        return repository.findAll().stream()
-                .map(this::toDomain)
-                .collect(Collectors.toList());
+        log.debug("Buscando todas las categorías en DB");
+        return mapper.toDomain(repository.findAll());
     }
 
     @Override
     public void delete(Category category) {
-        log.debug("Eliminando categorÃ­a en DB: {}", category.getId());
+        log.debug("Eliminando categoría en DB: {}", category.getId());
         repository.deleteById(category.getId());
-    }
-
-    private Category toDomain(CategoryEntity entity) {
-        Category domain = new Category();
-        domain.setId(entity.getId());
-        domain.setName(entity.getName());
-        domain.setParentId(entity.getParentId());
-        domain.setPathNames(entity.getPathNames());
-        domain.setSystem(entity.isSystem());
-        return domain;
-    }
-
-    private CategoryEntity toEntity(Category domain) {
-        CategoryEntity entity = null;
-        if (domain.getId() != null) {
-            entity = repository.findById(domain.getId()).orElse(null);
-        }
-        if (entity == null) {
-            entity = new CategoryEntity();
-            entity.setId(domain.getId() == null ? UUID.randomUUID() : domain.getId());
-        }
-        entity.setName(domain.getName());
-        entity.setParentId(domain.getParentId());
-        entity.setPathNames(domain.getPathNames());
-        entity.setSystem(domain.isSystem());
-        return entity;
     }
 }

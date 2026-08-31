@@ -17,7 +17,7 @@ public class ProductService {
 
     public Product create(String name, BigDecimal priceBuy, BigDecimal priceSell, UUID categoryId) {
         log.info("Creando nuevo producto: {}", name);
-        Product product = new Product(UUID.randomUUID(), name, priceBuy, priceSell, categoryId, false);
+        Product product = new Product(name, priceBuy, priceSell, categoryId);
         return productRepository.save(product);
     }
 
