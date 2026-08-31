@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.net.URI;
 
+// responseEntity se encarga de serializar la lista o el objeto que le llegue
 public abstract class BaseController {
-
     protected <T> ResponseEntity<ApiResponse<T>> created(T data, String path) {
         return ResponseEntity
                 .created(URI.create(path))
