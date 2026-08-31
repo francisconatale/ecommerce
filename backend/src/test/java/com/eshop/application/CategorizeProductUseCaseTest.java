@@ -30,8 +30,8 @@ public class CategorizeProductUseCaseTest {
     @Transactional
     void shouldAssignProductToLeafCategory() {
         // Arrange
-        Category root = categoryService.create("Electronics", null);
-        Category leaf = categoryService.create("Smartphones", root.getId());
+        Category root = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Electronics", null));
+        Category leaf = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Smartphones", root.getId()));
         
         Product product = new Product("iPhone 15", BigDecimal.valueOf(800), BigDecimal.valueOf(1000), root.getId());
         product = productRepository.save(product);

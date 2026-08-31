@@ -5,7 +5,8 @@ import com.eshop.domain.product.Product;
 import com.eshop.domain.category.Category;
 import com.eshop.domain.category.CategoryService;
 import com.eshop.domain.product.ProductService;
-import com.eshop.infrastructure.web.product.ProductRequest;
+import com.eshop.infrastructure.web.product.CreateProductRequest;
+import com.eshop.infrastructure.web.product.UpdateProductRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,9 +49,9 @@ public class ProductControllerIntegrationTest {
 
     @Test
     void shouldCreateProduct() throws Exception {
-        Category category = categoryService.create("Product Category", null);
+        Category category = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Product Category", null));
         
-        ProductRequest request = new ProductRequest(
+        CreateProductRequest request = new CreateProductRequest(
             "Integration Test Product",
             BigDecimal.valueOf(10.5),
             BigDecimal.valueOf(20.0),
@@ -66,14 +67,14 @@ public class ProductControllerIntegrationTest {
 
     @Test
     void shouldSoftDeleteProduct() throws Exception {
-        Category category = categoryService.create("Category for Deletion", null);
-        Product product = productService.create("To Be Deleted Product", BigDecimal.ONE, BigDecimal.TEN, category.getId());
+        Category category = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Category for Deletion", null));
+        Product product = productService.create(new com.eshop.domain.product.CreateProductCommand("To Be Deleted Product", BigDecimal.ONE, BigDecimal.TEN, category.getId()));
         
         mockMvc.perform(delete("/api/products/" + product.getId()))
                 .andExpect(status().isNoContent());
                 
         // Verification: It shouldn't be found in findAll
-        boolean exists = productService.findAll().stream().anyMatch(p -> p.getId().equals(product.getId()));
+        boolean exists = productService.findAll(org.springframework.data.domain.Pageable.unpaged()).stream().anyMatch(p -> p.getId().equals(product.getId()));
         assertThat(exists).isFalse();
     }
 }

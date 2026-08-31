@@ -61,9 +61,9 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
-    public List<Product> findAll() {
-        log.debug("Buscando todos los productos en DB");
-        return mapper.toDomain(repository.findAll());
+    public org.springframework.data.domain.Page<Product> findAll(org.springframework.data.domain.Pageable pageable) {
+        log.debug("Buscando todos los productos en DB (paginado)");
+        return repository.findAll(pageable).map(mapper::toDomain);
     }
 
     @Override

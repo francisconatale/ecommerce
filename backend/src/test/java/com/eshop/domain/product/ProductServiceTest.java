@@ -10,34 +10,42 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import org.mockito.Mock;
+import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
+import com.eshop.domain.product.CreateProductCommand;
 
 public class ProductServiceTest {
 
+    @Mock
     private ProductRepository productRepository;
+
+    @InjectMocks
     private ProductService productService;
 
     @BeforeEach
     void setUp() {
-        productRepository = mock(ProductRepository.class);
-        productService = new ProductService(productRepository);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
     void shouldCreateProduct() {
-        Product savedProduct = new Product(UUID.randomUUID(), "Test", BigDecimal.TEN, BigDecimal.valueOf(20), UUID.randomUUID(), false);
-        when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
+        CreateProductCommand command = new CreateProductCommand("Laptop", BigDecimal.valueOf(1000), BigDecimal.valueOf(1500), UUID.randomUUID());
+        
+        when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArguments()[0]);
 
-        Product result = productService.create("Test", BigDecimal.TEN, BigDecimal.valueOf(20), UUID.randomUUID());
+        Product result = productService.create(command);
 
-        assertThat(result.getName()).isEqualTo("Test");
+        assertThat(result.getName()).isEqualTo("Laptop");
         verify(productRepository).save(any(Product.class));
     }
 
     @Test
     void shouldDeleteProduct() {
         UUID id = UUID.randomUUID();
-        Product product = new Product(id, "Test", BigDecimal.TEN, BigDecimal.valueOf(20), UUID.randomUUID(), false);
-        when(productRepository.findById(id)).thenReturn(Optional.of(product));
+        Product product = new Product("Test", BigDecimal.TEN, BigDecimal.valueOf(20), UUID.randomUUID());
+        product.setId(id);
+        when(productRepository.getOrThrow(id)).thenReturn(product);
 
         productService.delete(id);
 

@@ -11,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.eshop.domain.category.CreateCategoryCommand;
+import com.eshop.domain.category.UpdateCategoryCommand;
 import java.util.List;
 import java.util.UUID;
 import java.math.BigDecimal;
@@ -38,8 +40,8 @@ public class CategoryServiceTest {
     @Test
     void shouldDeleteRootCategory() {
         // Deleting "Root"
-        Category root = service.create("Root", null);
-        Category child = service.create("Child", root.getId());
+        Category root = service.create(new CreateCategoryCommand("Root", null));
+        Category child = service.create(new CreateCategoryCommand("Child", root.getId()));
 
         Product product = new Product();
         product.setName("Prod");
@@ -63,9 +65,9 @@ public class CategoryServiceTest {
     @Test
     void shouldDeleteIntermediateCategory() {
         // Deleting "Middle" (Parent: "Root", Child: "Leaf")
-        Category root = service.create("Root", null);
-        Category middle = service.create("Middle", root.getId());
-        Category leaf = service.create("Leaf", middle.getId());
+        Category root = service.create(new CreateCategoryCommand("Root", null));
+        Category middle = service.create(new CreateCategoryCommand("Middle", root.getId()));
+        Category leaf = service.create(new CreateCategoryCommand("Leaf", middle.getId()));
 
         Product product = new Product();
         product.setName("Prod");
@@ -88,9 +90,9 @@ public class CategoryServiceTest {
 
     @Test
     void shouldDeleteLeafCategory() {
-        Category root = service.create("Root", null);
-        Category middle = service.create("Middle", root.getId());
-        Category leaf = service.create("Leaf", middle.getId());
+        Category root = service.create(new CreateCategoryCommand("Root", null));
+        Category middle = service.create(new CreateCategoryCommand("Middle", root.getId()));
+        Category leaf = service.create(new CreateCategoryCommand("Leaf", middle.getId()));
 
         Product product = new Product();
         product.setName("Prod");
@@ -110,10 +112,10 @@ public class CategoryServiceTest {
 
     @Test
     void shouldUpdatePathsForMultipleDescendants() {
-        Category parent = service.create("Parent", null);
-        Category child1 = service.create("Child1", parent.getId());
-        Category child2 = service.create("Child2", parent.getId());
-        Category grandChild = service.create("GrandChild", child1.getId());
+        Category parent = service.create(new CreateCategoryCommand("Parent", null));
+        Category child1 = service.create(new CreateCategoryCommand("Child1", parent.getId()));
+        Category child2 = service.create(new CreateCategoryCommand("Child2", parent.getId()));
+        Category grandChild = service.create(new CreateCategoryCommand("GrandChild", child1.getId()));
 
         service.delete(parent.getId());
 
@@ -128,8 +130,8 @@ public class CategoryServiceTest {
 
     @Test
     void shouldReassignProductsToGrandparent() {
-        Category grandparent = service.create("Grandparent", null);
-        Category parent = service.create("Parent", grandparent.getId());
+        Category grandparent = service.create(new CreateCategoryCommand("Grandparent", null));
+        Category parent = service.create(new CreateCategoryCommand("Parent", grandparent.getId()));
 
         Product p1 = new Product(); p1.setName("p1"); p1.setPriceBuy(BigDecimal.ZERO); p1.setPriceSell(BigDecimal.ZERO); p1.setCategoryId(parent.getId());
         Product p2 = new Product(); p2.setName("p2"); p2.setPriceBuy(BigDecimal.ZERO); p2.setPriceSell(BigDecimal.ZERO); p2.setCategoryId(parent.getId());
@@ -153,7 +155,7 @@ public class CategoryServiceTest {
         Category savedSystemCategory = categoryRepository.save(systemCategory);
 
         assertThrows(SystemCategoryImmutableException.class, () -> {
-            service.update(savedSystemCategory.getId(), "New Name", null);
+            service.update(new UpdateCategoryCommand(savedSystemCategory.getId(), "New Name", null));
         });
     }
 
@@ -171,18 +173,18 @@ public class CategoryServiceTest {
 
     @Test
     void shouldThrowCircularDependencyExceptionWhenMovingToDescendant() {
-        Category parent = service.create("Parent", null);
-        Category child = service.create("Child", parent.getId());
+        Category parent = service.create(new CreateCategoryCommand("Parent", null));
+        Category child = service.create(new CreateCategoryCommand("Child", parent.getId()));
 
         assertThrows(CircularDependencyException.class, () -> {
-            service.update(parent.getId(), "Parent", child.getId());
+            service.update(new UpdateCategoryCommand(parent.getId(), "Parent", child.getId()));
         });
     }
 
     @Test
     void shouldThrowResourceNotFoundExceptionWhenCategoryDoesNotExist() {
         assertThrows(ResourceNotFoundException.class, () -> {
-            service.update(UUID.randomUUID(), "Non-existent", null);
+            service.update(new UpdateCategoryCommand(UUID.randomUUID(), "Non-existent", null));
         });
     }
 }

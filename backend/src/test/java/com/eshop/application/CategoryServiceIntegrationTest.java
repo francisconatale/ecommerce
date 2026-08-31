@@ -30,20 +30,20 @@ public class CategoryServiceIntegrationTest {
     @Test
     @Transactional
     void shouldUpdateParentAndRecalculatePathsForDescendants() {
-        Category root1 = categoryService.create("Root 1", null);
-        Category root2 = categoryService.create("Root 2", null);
-        Category child = categoryService.create("Child", root1.getId());
-        Category grandChild = categoryService.create("GrandChild", child.getId());
+        Category root1 = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Root 1", null));
+        Category root2 = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Root 2", null));
+        Category child = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Child", root1.getId()));
+        Category grandChild = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("GrandChild", child.getId()));
 
         assertThat(child.getPathNames()).isEqualTo("Root 1 > Child");
         assertThat(grandChild.getPathNames()).isEqualTo("Root 1 > Child > GrandChild");
 
         // Act: Move child to root2
-        categoryService.update(child.getId(), "Child Renamed", root2.getId());
+        categoryService.update(new com.eshop.domain.category.UpdateCategoryCommand(child.getId(), "Child Renamed", root2.getId()));
 
         // Assert
-        Category updatedChild = categoryService.findAll().stream().filter(c -> c.getId().equals(child.getId())).findFirst().get();
-        Category updatedGrandChild = categoryService.findAll().stream().filter(c -> c.getId().equals(grandChild.getId())).findFirst().get();
+        Category updatedChild = categoryService.findAll(org.springframework.data.domain.Pageable.unpaged()).stream().filter(c -> c.getId().equals(child.getId())).findFirst().get();
+        Category updatedGrandChild = categoryService.findAll(org.springframework.data.domain.Pageable.unpaged()).stream().filter(c -> c.getId().equals(grandChild.getId())).findFirst().get();
 
         assertThat(updatedChild.getPathNames()).isEqualTo("Root 2 > Child Renamed");
         assertThat(updatedGrandChild.getPathNames()).isEqualTo("Root 2 > Child Renamed > GrandChild");
@@ -53,10 +53,10 @@ public class CategoryServiceIntegrationTest {
     @Transactional
     void shouldFetchProductsFromRootAndAllDescendants() {
         // Arrange
-        Category electronics = categoryService.create("Electronics", null);
-        Category phones = categoryService.create("Phones", electronics.getId());
-        Category laptops = categoryService.create("Laptops", electronics.getId());
-        Category gamingLaptops = categoryService.create("Gaming Laptops", laptops.getId());
+        Category electronics = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Electronics", null));
+        Category phones = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Phones", electronics.getId()));
+        Category laptops = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Laptops", electronics.getId()));
+        Category gamingLaptops = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Gaming Laptops", laptops.getId()));
 
         productRepository.save(new Product("Generic Wire", BigDecimal.TEN, BigDecimal.TEN, electronics.getId()));
         productRepository.save(new Product("iPhone", BigDecimal.TEN, BigDecimal.TEN, phones.getId()));
@@ -76,9 +76,9 @@ public class CategoryServiceIntegrationTest {
     @Transactional
     void shouldDistinguishProductsBetweenSiblings() {
         // Arrange
-        Category electronics = categoryService.create("Electronics", null);
-        Category phones = categoryService.create("Phones", electronics.getId());
-        Category laptops = categoryService.create("Laptops", electronics.getId());
+        Category electronics = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Electronics", null));
+        Category phones = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Phones", electronics.getId()));
+        Category laptops = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Laptops", electronics.getId()));
 
         productRepository.save(new Product("iPhone", BigDecimal.TEN, BigDecimal.TEN, phones.getId()));
         productRepository.save(new Product("MacBook", BigDecimal.TEN, BigDecimal.TEN, laptops.getId()));

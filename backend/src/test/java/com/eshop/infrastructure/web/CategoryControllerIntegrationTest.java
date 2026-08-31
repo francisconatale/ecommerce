@@ -3,7 +3,8 @@ package com.eshop.infrastructure.web;
 import com.eshop.TestcontainersConfiguration;
 import com.eshop.domain.category.Category;
 import com.eshop.domain.category.CategoryService;
-import com.eshop.infrastructure.web.category.CategoryRequest;
+import com.eshop.infrastructure.web.category.CreateCategoryRequest;
+import com.eshop.infrastructure.web.category.UpdateCategoryRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ public class CategoryControllerIntegrationTest {
 
     @Test
     void shouldCreateCategory() throws Exception {
-        CategoryRequest request = new CategoryRequest("Initial Name", null);
+        CreateCategoryRequest request = new CreateCategoryRequest("Initial Name", null);
         
         mockMvc.perform(post("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -52,29 +53,29 @@ public class CategoryControllerIntegrationTest {
 
     @Test
     void shouldUpdateCategory() throws Exception {
-        Category created = categoryService.create("Initial Name", null);
+        Category created = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Initial Name", null));
         
-        CategoryRequest updateRequest = new CategoryRequest("Updated Name", null);
+        UpdateCategoryRequest updateRequest = new UpdateCategoryRequest("Updated Name", null);
 
-        mockMvc.perform(put("/api/categories/" + created.getId())
+        mockMvc.perform(patch("/api/categories/" + created.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name").value("Updated Name"));
                 
-        Category updated = categoryService.findAll().stream().filter(c -> c.getId().equals(created.getId())).findFirst().get();
+        Category updated = categoryService.findAll(org.springframework.data.domain.Pageable.unpaged()).stream().filter(c -> c.getId().equals(created.getId())).findFirst().get();
         assertThat(updated.getName()).isEqualTo("Updated Name");
     }
 
     @Test
     void shouldDeleteCategory() throws Exception {
-        Category parent = categoryService.create("Parent", null);
-        Category child = categoryService.create("Child", parent.getId());
+        Category parent = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Parent", null));
+        Category child = categoryService.create(new com.eshop.domain.category.CreateCategoryCommand("Child", parent.getId()));
         
         mockMvc.perform(delete("/api/categories/" + child.getId()))
                 .andExpect(status().isNoContent());
                 
-        boolean exists = categoryService.findAll().stream().anyMatch(c -> c.getId().equals(child.getId()));
+        boolean exists = categoryService.findAll(org.springframework.data.domain.Pageable.unpaged()).stream().anyMatch(c -> c.getId().equals(child.getId()));
         assertThat(exists).isFalse();
     }
 }

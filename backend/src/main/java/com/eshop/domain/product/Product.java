@@ -15,21 +15,40 @@ public class Product extends BaseEntity {
     private BigDecimal priceBuy;
     private BigDecimal priceSell;
     private UUID categoryId;
-    
-    public Product(UUID id, String name, BigDecimal priceBuy, BigDecimal priceSell, UUID categoryId, boolean deleted) {
-        this.setDeleted(deleted);
-        this.setId(id);
+
+    public Product(String name, BigDecimal priceBuy, BigDecimal priceSell, UUID categoryId) {
+        validatePrices(priceBuy, priceSell);
+        this.name = name;
+        this.priceBuy = priceBuy;
+        this.priceSell = priceSell;
+        this.categoryId = categoryId;
+        this.setDeleted(false);
+    }
+
+    public void updateDetails(String name, BigDecimal priceBuy, BigDecimal priceSell, UUID categoryId) {
+        validatePrices(priceBuy, priceSell);
         this.name = name;
         this.priceBuy = priceBuy;
         this.priceSell = priceSell;
         this.categoryId = categoryId;
     }
 
-    public Product(String name, BigDecimal priceBuy, BigDecimal priceSell, UUID categoryId) {
-        this.name = name;
-        this.priceBuy = priceBuy;
-        this.priceSell = priceSell;
-        this.categoryId = categoryId;
-        this.setDeleted(false);
+    public void assignToCategory(UUID newCategoryId) {
+        this.categoryId = newCategoryId;
+    }
+
+    private void validatePrices(BigDecimal priceBuy, BigDecimal priceSell) {
+        if (priceBuy == null) {
+            throw new IllegalArgumentException("Price buy cannot be null");
+        }
+        if (priceSell == null) {
+            throw new IllegalArgumentException("Price sell cannot be null");
+        }
+        if (priceBuy.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Price buy cannot be negative");
+        }
+        if (priceSell.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Price sell cannot be negative");
+        }
     }
 }

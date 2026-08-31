@@ -4,13 +4,18 @@ import com.eshop.infrastructure.web.base.BaseController;
 
 import com.eshop.domain.product.ProductService;
 import com.eshop.infrastructure.web.base.ApiResponse;
-import com.eshop.infrastructure.web.product.ProductRequest;
+import com.eshop.domain.product.CreateProductCommand;
+import com.eshop.domain.product.UpdateProductCommand;
+
 import com.eshop.infrastructure.web.product.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.net.URI;
 import java.util.List;
@@ -24,18 +29,19 @@ import java.util.stream.Collectors;
 public class ProductController extends BaseController {
 
     private final ProductService productService;
+    private final ProductWebMapper productWebMapper;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@RequestBody ProductRequest request) {
-        ProductResponse response = ProductResponse.fromDomain(productService.create(request.name(), request.priceBuy(), request.priceSell(), request.categoryId()));
-        return created(response, "/api/products/" + response.id());
+    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@Valid @RequestBody CreateProductRequest request) {
+        CreateProductCommand command = new CreateProductCommand(request.name(), request.priceBuy(), request.priceSell(), request.categoryId());
+        ProductResponse response = productWebMapper.toResponse(productService.create(command));
+        return created(response, response.id().toString());
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts() {
-        List<ProductResponse> products = productService.findAll().stream()
-                .map(ProductResponse::fromDomain)
-                .collect(Collectors.toList());
+    public ResponseEntity<ApiResponse<Page<ProductResponse>>> getProducts(Pageable pageable) {
+        Page<ProductResponse> products = productService.findAll(pageable)
+                .map(productWebMapper::toResponse);
                 
         if (products.isEmpty()) {
             return noContent();
@@ -45,13 +51,14 @@ public class ProductController extends BaseController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductResponse>> getProduct(@PathVariable UUID id) {
-        ProductResponse response = ProductResponse.fromDomain(productService.findById(id));
+        ProductResponse response = productWebMapper.toResponse(productService.findById(id));
         return ok(response);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@PathVariable UUID id, @RequestBody ProductRequest request) {
-        ProductResponse response = ProductResponse.fromDomain(productService.update(id, request.name(), request.priceBuy(), request.priceSell(), request.categoryId()));
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@PathVariable UUID id, @Valid @RequestBody UpdateProductRequest request) {
+        UpdateProductCommand command = new UpdateProductCommand(id, request.name(), request.priceBuy(), request.priceSell(), request.categoryId());
+        ProductResponse response = productWebMapper.toResponse(productService.update(command));
         return ok(response);
     }
 

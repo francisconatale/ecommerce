@@ -14,6 +14,9 @@ import com.eshop.domain.exception.CircularDependencyException;
 import com.eshop.domain.exception.MaxDepthExceededException;
 import com.eshop.domain.exception.SystemCategoryImmutableException;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -34,43 +37,38 @@ public class CategoryService {
     }
 
     @Transactional
-    public Category create(String name, UUID parentId) {
-        log.info("Creando nueva categoría: {} con parentId: {}", name, parentId);
-        Category category = new Category();
-        category.setName(name);
-        category.setParentId(parentId);
-        category.setSystem(false);
+    public Category create(CreateCategoryCommand command) {
+        log.info("Creando nueva categoría: {} con parentId: {}", command.name(), command.parentId());
+        Category category = new Category(command.name(), command.parentId());
 
-        boolean hasParent = parentId != null;
-        String pathNames = name;
-        if (hasParent) {
-            Category parent = getCategoryOrThrow(parentId);
-            pathNames = parent.getPathNames() + PATH_SEPARATOR + name;
-        }
+        Category parent = category.isRoot() ? null : categoryRepository.getOrThrow(command.parentId());
+        category.recalculatePath(parent);
 
-        category.setPathNames(pathNames);
         category = categoryRepository.save(category);
-        closureRepository.insertNodeIntoTree(category.getId(), hasParent ? parentId : category.getId());
+        closureRepository.insertNodeIntoTree(category.getId(), category.isRoot() ? category.getId() : command.parentId());
         
         log.info("Categoría creada exitosamente con ID: {}", category.getId());
         return category;
     }
 
     @Transactional(readOnly = true)
-    public List<Category> findAll() {
-        log.info("Obteniendo todas las categorÃƒÂ­as");
-        return categoryRepository.findAll();
+    public Page<Category> findAll(Pageable pageable) {
+        log.info("Obteniendo todas las categorías paginadas");
+        return categoryRepository.findAll(pageable);
     }
 
     @Transactional
-    public Category update(UUID categoryId, String newName, UUID newParentId) {
-        log.info("Actualizando categorÃƒÂ­a {}: nuevo nombre='{}', nuevo parentId='{}'", categoryId, newName, newParentId);
-        Category category = getCategoryOrThrow(categoryId);
-        validateNotSystemCategory(category);
+    public Category update(UpdateCategoryCommand command) {
+        log.info("Actualizando (parcialmente) categoría {}: nuevo nombre='{}', nuevo parentId='{}'", command.categoryId(), command.newName(), command.newParentId());
+        Category category = categoryRepository.getOrThrow(command.categoryId());
+        category.validateNotSystem();
+
+        String finalName = java.util.Optional.ofNullable(command.newName()).orElse(category.getName());
+        UUID finalParentId = java.util.Optional.ofNullable(command.newParentId()).orElse(category.getParentId());
 
         String oldPath = category.getPathNames();
-        boolean nameChanged = updateNameIfChanged(category, newName);
-        boolean parentChanged = updateParentIfChanged(category, newParentId);
+        boolean nameChanged = category.rename(finalName);
+        boolean parentChanged = handleParentChange(category, finalParentId);
 
         if (nameChanged || parentChanged) {
             updatePathsForCategoryAndDescendants(category, oldPath);
@@ -79,90 +77,56 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
-    private Category getCategoryOrThrow(UUID categoryId) {
-        return categoryRepository.findById(categoryId)
-            .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
-    }
-
-    private void validateNotSystemCategory(Category category) {
-        if (category.isSystem()) {
-            throw new SystemCategoryImmutableException("Cannot update a system category");
-        }
-    }
-
-    private boolean updateNameIfChanged(Category category, String newName) {
-        if (!category.getName().equals(newName)) {
-            category.setName(newName);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean updateParentIfChanged(Category category, UUID newParentId) {
+    private boolean handleParentChange(Category category, UUID newParentId) {
         if (Objects.equals(category.getParentId(), newParentId)) {
             return false;
         }
 
-        if (newParentId != null) {
+        boolean isMovingToRoot = (newParentId == null);
+
+        if (!isMovingToRoot) {
             boolean isDescendant = closureRepository.isDescendant(category.getId(), newParentId);
             validateMove(category.getId(), newParentId, isDescendant, 0);
         }
         
         closureRepository.disconnectSubtree(category.getId());
-        if (newParentId != null) {
+
+        if (!isMovingToRoot) {
             closureRepository.connectSubtree(category.getId(), newParentId);
         }
-        category.setParentId(newParentId);
-        
-        return true;
+        return category.moveToParent(newParentId);
     }
 
     private void updatePathsForCategoryAndDescendants(Category category, String oldPath) {
-        String newPath = calculateNewPath(category);
-        category.setPathNames(newPath);
+        Category parent = category.isRoot() ? null : categoryRepository.getOrThrow(category.getParentId());
+        category.recalculatePath(parent);
         
         List<Category> descendants = categoryRepository.findDescendants(category.getId());
         for (Category desc : descendants) {
-            if (desc.getPathNames() != null && oldPath != null && desc.getPathNames().startsWith(oldPath)) {
-                String updatedDescPath = newPath + desc.getPathNames().substring(oldPath.length());
-                desc.setPathNames(updatedDescPath);
-                categoryRepository.save(desc);
-            }
+            desc.replacePathPrefix(oldPath, category.getPathNames());
+            categoryRepository.save(desc);
         }
-    }
-
-    private String calculateNewPath(Category category) {
-        if (category.getParentId() == null) {
-            return category.getName();
-        }
-        Category parent = getCategoryOrThrow(category.getParentId());
-        return parent.getPathNames() + PATH_SEPARATOR + category.getName();
     }
 
     @Transactional
     public void assignProduct(UUID productId, UUID categoryId) {
-        log.info("Asignando producto {} a categorÃƒÂ­a {}", productId, categoryId);
-        Category category = getCategoryOrThrow(categoryId);
-        Product product = getProductOrThrow(productId);
+        log.info("Asignando producto {} a categoría {}", productId, categoryId);
+        Category category = categoryRepository.getOrThrow(categoryId);
+        Product product = productRepository.getOrThrow(productId);
         
-        product.setCategoryId(category.getId());
+        product.assignToCategory(category.getId());
         productRepository.save(product);
-        log.info("Producto {} asignado exitosamente a categorÃƒÂ­a {}", productId, categoryId);
-    }
-
-    private Product getProductOrThrow(UUID productId) {
-        return productRepository.findById(productId)
-            .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
+        log.info("Producto {} asignado exitosamente a categoría {}", productId, categoryId);
     }
 
     public void validateMove(UUID nodeId, UUID newParentId, boolean isNewParentDescendant, int projectedDepth) {
         if (isNewParentDescendant) {
-            log.warn("Movimiento invÃƒÂ¡lido: ciclo detectado para nodeId {}", nodeId);
+            log.warn("Movimiento invalido: ciclo detectado para nodeId {}", nodeId);
             throw new CircularDependencyException("Invalid move: cycle detected. Cannot move a category to its own descendant.");
         }
         
         if (projectedDepth > MAX_DEPTH) {
-            log.warn("Movimiento invÃƒÂ¡lido: profundidad proyectada {} excede MAX_DEPTH", projectedDepth);
+            log.warn("Movimiento invalido: profundidad proyectada {} excede MAX_DEPTH", projectedDepth);
             throw new MaxDepthExceededException(MAX_DEPTH);
         }
     }
@@ -173,32 +137,29 @@ public class CategoryService {
 
     @Transactional
     public void delete(UUID categoryId) {
-        log.info("Iniciando borrado de categorÃƒÂ­a {}", categoryId);
-        Category category = getCategoryOrThrow(categoryId);
-        validateNotSystemCategory(category);
+        log.info("Iniciando borrado de categoría {}", categoryId);
+        Category category = categoryRepository.getOrThrow(categoryId);
+        category.validateNotSystem();
 
         UUID parentId = determineNewParentForChildren(category.getParentId());
         
-        log.info("Reasignando hijos y productos de la categorÃƒÂ­a {} a su padre {}", categoryId, parentId);
+        log.info("Reasignando hijos y productos de la categoría {} a su padre {}", categoryId, parentId);
         reparentChildrenAndUpdatePaths(categoryId, parentId, category.getName());
         reparentProducts(categoryId, parentId);
         updateClosureTree(categoryId);
         
         categoryRepository.delete(category);
-        log.info("CategorÃƒÂ­a {} borrada exitosamente (soft delete)", categoryId);
+        log.info("Categoría {} borrada exitosamente (soft delete)", categoryId);
     }
 
     private void reparentChildrenAndUpdatePaths(UUID categoryId, UUID newParentId, String deletedCategoryName) {
         List<Category> descendants = categoryRepository.findDescendants(categoryId);
-        String stringToRemove = deletedCategoryName + PATH_SEPARATOR;
         
         for (Category desc : descendants) {
             if (categoryId.equals(desc.getParentId())) {
-                desc.setParentId(newParentId);
+                desc.moveToParent(newParentId);
             }
-            if (desc.getPathNames() != null) {
-                desc.setPathNames(desc.getPathNames().replace(stringToRemove, ""));
-            }
+            desc.removeDeletedParentFromPath(deletedCategoryName);
             categoryRepository.save(desc);
         }
     }
@@ -206,7 +167,7 @@ public class CategoryService {
     private void reparentProducts(UUID categoryId, UUID newParentId) {
         List<Product> products = productRepository.findByCategoryId(categoryId);
         for (Product product : products) {
-            product.setCategoryId(newParentId);
+            product.assignToCategory(newParentId);
             productRepository.save(product);
         }
     }

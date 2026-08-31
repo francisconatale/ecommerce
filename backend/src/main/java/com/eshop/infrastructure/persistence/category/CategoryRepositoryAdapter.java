@@ -57,9 +57,9 @@ public class CategoryRepositoryAdapter implements CategoryRepository {
     }
 
     @Override
-    public List<Category> findAll() {
-        log.debug("Buscando todas las categorías en DB");
-        return mapper.toDomain(repository.findAll());
+    public org.springframework.data.domain.Page<Category> findAll(org.springframework.data.domain.Pageable pageable) {
+        log.debug("Buscando todas las categorías en DB (paginado)");
+        return repository.findAll(pageable).map(mapper::toDomain);
     }
 
     @Override
