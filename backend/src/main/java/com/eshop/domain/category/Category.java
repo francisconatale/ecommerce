@@ -1,4 +1,4 @@
-﻿package com.eshop.domain.category;
+package com.eshop.domain.category;
 
 import com.eshop.domain.base.BaseEntity;
 import java.util.UUID;

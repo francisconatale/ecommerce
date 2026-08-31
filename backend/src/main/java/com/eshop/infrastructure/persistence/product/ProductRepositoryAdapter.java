@@ -1,4 +1,4 @@
-package com.eshop.infrastructure.persistence;
+package com.eshop.infrastructure.persistence.product;
 
 import com.eshop.domain.product.Product;
 import com.eshop.domain.product.ProductRepository;
@@ -37,7 +37,7 @@ public class ProductRepositoryAdapter implements ProductRepository {
 
     @Override
     public List<Product> findByCategoryId(UUID categoryId) {
-        log.debug("Buscando productos por categoría en DB: {}", categoryId);
+        log.debug("Buscando productos por categorÃ­a en DB: {}", categoryId);
         return repository.findByCategoryId(categoryId).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
@@ -45,7 +45,7 @@ public class ProductRepositoryAdapter implements ProductRepository {
 
     @Override
     public List<Product> findByCategoryAndDescendants(UUID categoryId) {
-        log.debug("Buscando productos de categoría y descendientes en DB: {}", categoryId);
+        log.debug("Buscando productos de categorÃ­a y descendientes en DB: {}", categoryId);
         return repository.findByCategoryAndDescendants(categoryId).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());

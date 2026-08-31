@@ -1,4 +1,4 @@
-package com.eshop.infrastructure.web.dto;
+package com.eshop.infrastructure.web.category;
 
 import java.util.UUID;
 

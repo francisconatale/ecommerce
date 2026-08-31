@@ -1,7 +1,7 @@
-package com.eshop.infrastructure.web;
+package com.eshop.infrastructure.web.tenant;
 
-import com.eshop.infrastructure.web.dto.StorefrontConfig;
-import com.eshop.infrastructure.web.dto.StorefrontSection;
+import com.eshop.infrastructure.web.tenant.StorefrontConfig;
+import com.eshop.infrastructure.web.tenant.StorefrontSection;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

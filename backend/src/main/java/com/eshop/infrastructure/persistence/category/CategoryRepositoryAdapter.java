@@ -1,4 +1,4 @@
-package com.eshop.infrastructure.persistence;
+package com.eshop.infrastructure.persistence.category;
 
 import com.eshop.domain.category.Category;
 import com.eshop.domain.category.CategoryRepository;
@@ -25,13 +25,13 @@ public class CategoryRepositoryAdapter implements CategoryRepository {
 
     @Override
     public Optional<Category> findById(UUID id) {
-        log.debug("Buscando categoría por ID en DB: {}", id);
+        log.debug("Buscando categorÃ­a por ID en DB: {}", id);
         return repository.findById(id).map(this::toDomain);
     }
 
     @Override
     public Category save(Category category) {
-        log.debug("Guardando categoría en DB: {}", category.getName());
+        log.debug("Guardando categorÃ­a en DB: {}", category.getName());
         CategoryEntity entity = toEntity(category);
         entity = repository.save(entity);
         return toDomain(entity);
@@ -39,7 +39,7 @@ public class CategoryRepositoryAdapter implements CategoryRepository {
 
     @Override
     public List<Category> findDescendants(UUID categoryId) {
-        log.debug("Buscando descendientes de categoría en DB: {}", categoryId);
+        log.debug("Buscando descendientes de categorÃ­a en DB: {}", categoryId);
         return repository.findDescendants(categoryId).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
@@ -47,7 +47,7 @@ public class CategoryRepositoryAdapter implements CategoryRepository {
 
     @Override
     public List<Category> findAll() {
-        log.debug("Buscando todas las categorías en DB");
+        log.debug("Buscando todas las categorÃ­as en DB");
         return repository.findAll().stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
@@ -55,7 +55,7 @@ public class CategoryRepositoryAdapter implements CategoryRepository {
 
     @Override
     public void delete(Category category) {
-        log.debug("Eliminando categoría en DB: {}", category.getId());
+        log.debug("Eliminando categorÃ­a en DB: {}", category.getId());
         repository.deleteById(category.getId());
     }
 

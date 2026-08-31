@@ -1,11 +1,11 @@
-package com.eshop.infrastructure.web;
+package C:.Users.franc.OneDrive.Desktop.prototype-eshop.backend.src.test.java.com.eshop.infrastructure.web;
 
 import com.eshop.TestcontainersConfiguration;
 import com.eshop.domain.product.Product;
 import com.eshop.domain.category.Category;
 import com.eshop.domain.category.CategoryService;
 import com.eshop.domain.product.ProductService;
-import com.eshop.infrastructure.web.dto.ProductRequest;
+import com.eshop.infrastructure.web.product.ProductRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

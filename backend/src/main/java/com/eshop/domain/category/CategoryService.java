@@ -1,11 +1,12 @@
 package com.eshop.domain.category;
-import com.eshop.infrastructure.persistence.SpringDataCategoryClosureRepository;
+import com.eshop.infrastructure.persistence.category.SpringDataCategoryClosureRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eshop.domain.product.Product;
 import com.eshop.domain.product.ProductRepository;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
+import java.util.Objects;
 import java.util.List;
 import com.eshop.domain.exception.BusinessException;
 import com.eshop.domain.exception.ResourceNotFoundException;
@@ -34,7 +35,7 @@ public class CategoryService {
 
     @Transactional
     public Category create(String name, UUID parentId) {
-        log.info("Creando nueva categoría: {} con parentId: {}", name, parentId);
+        log.info("Creando nueva categorÃƒÂ­a: {} con parentId: {}", name, parentId);
         Category category = new Category();
         category.setId(UUID.randomUUID());
         category.setName(name);
@@ -52,19 +53,19 @@ public class CategoryService {
         categoryRepository.save(category);
         closureRepository.insertNodeIntoTree(category.getId(), hasParent ? parentId : category.getId());
         
-        log.info("Categoría creada exitosamente con ID: {}", category.getId());
+        log.info("CategorÃƒÂ­a creada exitosamente con ID: {}", category.getId());
         return category;
     }
 
     @Transactional(readOnly = true)
     public List<Category> findAll() {
-        log.info("Obteniendo todas las categorías");
+        log.info("Obteniendo todas las categorÃƒÂ­as");
         return categoryRepository.findAll();
     }
 
     @Transactional
     public Category update(UUID categoryId, String newName, UUID newParentId) {
-        log.info("Actualizando categoría {}: nuevo nombre='{}', nuevo parentId='{}'", categoryId, newName, newParentId);
+        log.info("Actualizando categorÃƒÂ­a {}: nuevo nombre='{}', nuevo parentId='{}'", categoryId, newName, newParentId);
         Category category = getCategoryOrThrow(categoryId);
         validateNotSystemCategory(category);
 
@@ -99,7 +100,7 @@ public class CategoryService {
     }
 
     private boolean updateParentIfChanged(Category category, UUID newParentId) {
-        if (java.util.Objects.equals(category.getParentId(), newParentId)) {
+        if (Objects.equals(category.getParentId(), newParentId)) {
             return false;
         }
 
@@ -141,13 +142,13 @@ public class CategoryService {
 
     @Transactional
     public void assignProduct(UUID productId, UUID categoryId) {
-        log.info("Asignando producto {} a categoría {}", productId, categoryId);
+        log.info("Asignando producto {} a categorÃƒÂ­a {}", productId, categoryId);
         Category category = getCategoryOrThrow(categoryId);
         Product product = getProductOrThrow(productId);
         
         product.setCategoryId(category.getId());
         productRepository.save(product);
-        log.info("Producto {} asignado exitosamente a categoría {}", productId, categoryId);
+        log.info("Producto {} asignado exitosamente a categorÃƒÂ­a {}", productId, categoryId);
     }
 
     private Product getProductOrThrow(UUID productId) {
@@ -157,12 +158,12 @@ public class CategoryService {
 
     public void validateMove(UUID nodeId, UUID newParentId, boolean isNewParentDescendant, int projectedDepth) {
         if (isNewParentDescendant) {
-            log.warn("Movimiento inválido: ciclo detectado para nodeId {}", nodeId);
+            log.warn("Movimiento invÃƒÂ¡lido: ciclo detectado para nodeId {}", nodeId);
             throw new CircularDependencyException("Invalid move: cycle detected. Cannot move a category to its own descendant.");
         }
         
         if (projectedDepth > MAX_DEPTH) {
-            log.warn("Movimiento inválido: profundidad proyectada {} excede MAX_DEPTH", projectedDepth);
+            log.warn("Movimiento invÃƒÂ¡lido: profundidad proyectada {} excede MAX_DEPTH", projectedDepth);
             throw new MaxDepthExceededException(MAX_DEPTH);
         }
     }
@@ -173,19 +174,19 @@ public class CategoryService {
 
     @Transactional
     public void delete(UUID categoryId) {
-        log.info("Iniciando borrado de categoría {}", categoryId);
+        log.info("Iniciando borrado de categorÃƒÂ­a {}", categoryId);
         Category category = getCategoryOrThrow(categoryId);
         validateNotSystemCategory(category);
 
         UUID parentId = determineNewParentForChildren(category.getParentId());
         
-        log.info("Reasignando hijos y productos de la categoría {} a su padre {}", categoryId, parentId);
+        log.info("Reasignando hijos y productos de la categorÃƒÂ­a {} a su padre {}", categoryId, parentId);
         reparentChildrenAndUpdatePaths(categoryId, parentId, category.getName());
         reparentProducts(categoryId, parentId);
         updateClosureTree(categoryId);
         
         categoryRepository.delete(category);
-        log.info("Categoría {} borrada exitosamente (soft delete)", categoryId);
+        log.info("CategorÃƒÂ­a {} borrada exitosamente (soft delete)", categoryId);
     }
 
     private void reparentChildrenAndUpdatePaths(UUID categoryId, UUID newParentId, String deletedCategoryName) {
@@ -216,3 +217,4 @@ public class CategoryService {
         closureRepository.removeNodeFromTree(categoryId);
     }
 }
+

@@ -1,4 +1,4 @@
-package com.eshop.infrastructure.web.dto;
+package com.eshop.infrastructure.web.product;
 
 import java.math.BigDecimal;
 import java.util.UUID;

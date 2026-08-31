@@ -1,4 +1,4 @@
-package com.eshop.domain.category;
+package C:.Users.franc.OneDrive.Desktop.prototype-eshop.backend.src.test.java.com.eshop.domain.category;
 
 import com.eshop.TestcontainersConfiguration;
 import com.eshop.domain.product.Product;
@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.math.BigDecimal;
 
 import com.eshop.domain.exception.CircularDependencyException;
 import com.eshop.domain.exception.ResourceNotFoundException;
@@ -43,8 +44,8 @@ public class CategoryServiceTest {
         Product product = new Product();
         product.setId(UUID.randomUUID());
         product.setName("Prod");
-        product.setPriceBuy(java.math.BigDecimal.ZERO);
-        product.setPriceSell(java.math.BigDecimal.ZERO);
+        product.setPriceBuy(BigDecimal.ZERO);
+        product.setPriceSell(BigDecimal.ZERO);
         product.setCategoryId(root.getId());
         productRepository.save(product);
 
@@ -70,8 +71,8 @@ public class CategoryServiceTest {
         Product product = new Product();
         product.setId(UUID.randomUUID());
         product.setName("Prod");
-        product.setPriceBuy(java.math.BigDecimal.ZERO);
-        product.setPriceSell(java.math.BigDecimal.ZERO);
+        product.setPriceBuy(BigDecimal.ZERO);
+        product.setPriceSell(BigDecimal.ZERO);
         product.setCategoryId(middle.getId());
         productRepository.save(product);
 
@@ -96,8 +97,8 @@ public class CategoryServiceTest {
         Product product = new Product();
         product.setId(UUID.randomUUID());
         product.setName("Prod");
-        product.setPriceBuy(java.math.BigDecimal.ZERO);
-        product.setPriceSell(java.math.BigDecimal.ZERO);
+        product.setPriceBuy(BigDecimal.ZERO);
+        product.setPriceSell(BigDecimal.ZERO);
         product.setCategoryId(leaf.getId());
         productRepository.save(product);
 
@@ -133,8 +134,8 @@ public class CategoryServiceTest {
         Category grandparent = service.create("Grandparent", null);
         Category parent = service.create("Parent", grandparent.getId());
 
-        Product p1 = new Product(); p1.setId(UUID.randomUUID()); p1.setName("p1"); p1.setPriceBuy(java.math.BigDecimal.ZERO); p1.setPriceSell(java.math.BigDecimal.ZERO); p1.setCategoryId(parent.getId());
-        Product p2 = new Product(); p2.setId(UUID.randomUUID()); p2.setName("p2"); p2.setPriceBuy(java.math.BigDecimal.ZERO); p2.setPriceSell(java.math.BigDecimal.ZERO); p2.setCategoryId(parent.getId());
+        Product p1 = new Product(); p1.setId(UUID.randomUUID()); p1.setName("p1"); p1.setPriceBuy(BigDecimal.ZERO); p1.setPriceSell(BigDecimal.ZERO); p1.setCategoryId(parent.getId());
+        Product p2 = new Product(); p2.setId(UUID.randomUUID()); p2.setName("p2"); p2.setPriceBuy(BigDecimal.ZERO); p2.setPriceSell(BigDecimal.ZERO); p2.setCategoryId(parent.getId());
         productRepository.save(p1);
         productRepository.save(p2);
 
@@ -190,3 +191,4 @@ public class CategoryServiceTest {
         });
     }
 }
+

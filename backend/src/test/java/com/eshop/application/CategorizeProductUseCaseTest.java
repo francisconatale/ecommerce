@@ -1,4 +1,4 @@
-package com.eshop.application;
+package C:.Users.franc.OneDrive.Desktop.prototype-eshop.backend.src.test.java.com.eshop.application;
 
 import com.eshop.TestcontainersConfiguration;
 import com.eshop.domain.category.Category;

@@ -20,10 +20,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable()) // Deshabilitamos CSRF para el MVP (usaremos JWT más adelante)
+            .csrf(csrf -> csrf.disable()) // Deshabilitamos CSRF para el MVP (usaremos JWT mÃ¡s adelante)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Permitir acceso público a Swagger UI y OpenAPI docs
+                // Permitir acceso pÃºblico a Swagger UI y OpenAPI docs
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 // Por ahora, permitimos acceso a toda la API hasta que implementemos JWT/Auth
                 .requestMatchers("/api/**").permitAll()

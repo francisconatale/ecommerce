@@ -1,4 +1,6 @@
-package com.eshop.infrastructure.persistence;
+package com.eshop.infrastructure.persistence.product;
+import com.eshop.infrastructure.persistence.base.JpaBaseEntity;
+import com.eshop.infrastructure.persistence.base.JpaBaseEntity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;

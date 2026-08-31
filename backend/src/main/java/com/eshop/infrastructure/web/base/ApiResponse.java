@@ -1,4 +1,4 @@
-package com.eshop.infrastructure.web.dto;
+package com.eshop.infrastructure.web.base;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

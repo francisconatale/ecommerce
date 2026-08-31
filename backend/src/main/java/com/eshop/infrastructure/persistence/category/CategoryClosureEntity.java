@@ -1,4 +1,6 @@
-package com.eshop.infrastructure.persistence;
+package com.eshop.infrastructure.persistence.category;
+import com.eshop.infrastructure.persistence.category.CategoryEntity;
+import com.eshop.infrastructure.persistence.category.CategoryEntity;
 
 import jakarta.persistence.*;
 import java.io.Serializable;

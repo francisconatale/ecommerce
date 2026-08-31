@@ -1,4 +1,4 @@
-package com.eshop.infrastructure.web.dto;
+package com.eshop.infrastructure.web.product;
 
 import com.eshop.domain.product.Product;
 import java.math.BigDecimal;

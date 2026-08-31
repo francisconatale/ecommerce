@@ -1,4 +1,4 @@
-package com.eshop.infrastructure.persistence;
+package C:.Users.franc.OneDrive.Desktop.prototype-eshop.backend.src.test.java.com.eshop.infrastructure.persistence;
 
 import com.eshop.TestcontainersConfiguration;
 import org.junit.jupiter.api.Test;
@@ -20,9 +20,9 @@ public class CategoryRepositoryTest {
     void shouldSaveCategoryAndGenerateId() {
         CategoryEntity category = new CategoryEntity();
         category.setId(UUID.randomUUID());
-        category.setName("Electrónica");
+        category.setName("ElectrÃ³nica");
         category.setSystem(false);
-        category.setPathNames("Electrónica");
+        category.setPathNames("ElectrÃ³nica");
         category.setCreatedAt(LocalDateTime.now());
         category.setUpdatedAt(LocalDateTime.now());
         category.setDeleted(false);
