@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Product extends BaseEntity {
     private String name;
+    private String nameNormalized;
     private BigDecimal priceBuy;
     private BigDecimal priceSell;
     private UUID categoryId;
@@ -19,6 +20,7 @@ public class Product extends BaseEntity {
     public Product(String name, BigDecimal priceBuy, BigDecimal priceSell, UUID categoryId) {
         validatePrices(priceBuy, priceSell);
         this.name = name;
+        this.nameNormalized = normalize(name);
         this.priceBuy = priceBuy;
         this.priceSell = priceSell;
         this.categoryId = categoryId;
@@ -28,6 +30,7 @@ public class Product extends BaseEntity {
     public void updateDetails(String name, BigDecimal priceBuy, BigDecimal priceSell, UUID categoryId) {
         validatePrices(priceBuy, priceSell);
         this.name = name;
+        this.nameNormalized = normalize(name);
         this.priceBuy = priceBuy;
         this.priceSell = priceSell;
         this.categoryId = categoryId;
@@ -35,6 +38,12 @@ public class Product extends BaseEntity {
 
     public void assignToCategory(UUID newCategoryId) {
         this.categoryId = newCategoryId;
+    }
+
+    private String normalize(String value) {
+        if (value == null) return null;
+        String normalized = java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "").toLowerCase();
     }
 
     private void validatePrices(BigDecimal priceBuy, BigDecimal priceSell) {

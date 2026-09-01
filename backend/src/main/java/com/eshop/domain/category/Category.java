@@ -16,15 +16,6 @@ public class Category extends BaseEntity {
     private UUID parentId;
     private boolean isSystem;
     private String pathNames;
-    
-    public Category(UUID id, String name, UUID parentId, boolean isSystem, String pathNames, boolean deleted) {
-        this.setId(id);
-        this.name = name;
-        this.parentId = parentId;
-        this.isSystem = isSystem;
-        this.pathNames = pathNames;
-        this.setDeleted(deleted);
-    }
 
     public Category(String name, UUID parentId) {
         this.name = name;

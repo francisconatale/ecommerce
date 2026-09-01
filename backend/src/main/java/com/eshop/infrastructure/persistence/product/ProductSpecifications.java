@@ -13,8 +13,10 @@ public class ProductSpecifications {
         }
 
         if (filter.getName() != null && !filter.getName().trim().isEmpty()) {
+            String normalizedFilter = java.text.Normalizer.normalize(filter.getName(), java.text.Normalizer.Form.NFD)
+                    .replaceAll("\\p{InCombiningDiacriticalMarks}+", "").toLowerCase();
             spec = spec.and((root, query, cb) -> 
-                cb.like(cb.lower(root.get("name")), "%" + filter.getName().toLowerCase() + "%"));
+                cb.like(root.get("nameNormalized"), "%" + normalizedFilter + "%"));
         }
         if (filter.getCategoryId() != null) {
             spec = spec.and((root, query, cb) -> 

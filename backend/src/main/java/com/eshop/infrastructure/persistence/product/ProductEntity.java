@@ -19,6 +19,9 @@ public class ProductEntity extends JpaBaseEntity {
     
     private String name;
     
+    @Column(name = "name_normalized")
+    private String nameNormalized;
+    
     @Column(name = "price_buy")
     private BigDecimal priceBuy;
     
