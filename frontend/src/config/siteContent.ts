@@ -3,6 +3,119 @@ import { Product } from "@/types/product";
 export const siteContent = {
   "layout": [
     {
+      "id": "section-nav",
+      "type": "navbar",
+      "config": {
+        "logoUrl": "https://acdn-us.mitiendanube.com/stores/006/133/691/products/nike-logo-24edf4f26f5a40025b17503629706845-1024-1024.webp",
+        "leftLinks": [
+          {
+            "type": "normal",
+            "name": "Home",
+            "href": "/"
+          },
+          {
+            "type": "normal",
+            "name": "Sobre nosotros",
+            "href": "/about"
+          },
+          {
+            "type": "interactive",
+            "name": "Productos",
+            "onHoverProps": {
+              "component": "ProductsMenu",
+              "links": [
+                {
+                  "name": "Zapatillas",
+                  "href": "/products/v1"
+                },
+                {
+                  "name": "Remeras",
+                  "href": "/products/v2"
+                },
+                {
+                  "name": "Buzos",
+                  "href": "/products/v3"
+                }
+              ]
+            }
+          },
+          {
+            "type": "normal",
+            "name": "New Link",
+            "href": "#"
+          }
+        ],
+        "rightLinks": [
+          {
+            "type": "interactive",
+            "name": "Pages",
+            "onHoverProps": {
+              "component": "MegaMenu",
+              "menuGroups": [
+                {
+                  "title": "Menu",
+                  "links": [
+                    {
+                      "name": "Home",
+                      "href": "/"
+                    },
+                    {
+                      "name": "About",
+                      "href": "/about"
+                    },
+                    {
+                      "name": "Contact",
+                      "href": "/contact"
+                    }
+                  ]
+                },
+                {
+                  "title": "Utility Pages",
+                  "links": [
+                    {
+                      "name": "Style guide",
+                      "href": "/style-guide"
+                    },
+                    {
+                      "name": "Licenses",
+                      "href": "/licenses"
+                    },
+                    {
+                      "name": "Changelog",
+                      "href": "/changelog"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "normal",
+            "name": "Contact",
+            "href": "/contact"
+          }
+        ],
+        "mobileLinks": [
+          {
+            "name": "Home",
+            "href": "/"
+          },
+          {
+            "name": "About",
+            "href": "/about"
+          },
+          {
+            "name": "Products",
+            "href": "/products"
+          },
+          {
+            "name": "Contact",
+            "href": "/contact"
+          }
+        ]
+      }
+    },
+    {
       "id": "section-1",
       "type": "featuredProducts",
       "config": {
@@ -65,7 +178,7 @@ export const siteContent = {
         "title": "New Collections Have Arrived",
         "description": "Explore furniture designed to transform your space — now with up to 30% off",
         "image": "/hero-bg.avif",
-        "align": "left",
+        "align": "right",
         "cta": {
           "label": "Explore the Collection",
           "href": "/"

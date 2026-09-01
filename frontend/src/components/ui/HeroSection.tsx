@@ -45,18 +45,18 @@ export function HeroSection({
           />
 
           <div className={`relative z-10 flex h-full items-center p-10 md:p-16 ${containerAlignClasses[align]}`}>
-            <div className={`flex max-w-[430px] flex-col text-white ${contentAlignClasses[align]}`}>
-              <h2 className="max-w-[380px] text-[48px] font-medium leading-[1.13] tracking-[-1px]">
+            <div className={`flex max-w-[500px] flex-col text-white ${contentAlignClasses[align]}`}>
+              <h2 className="max-w-[480px] text-[64px] font-light leading-[1.1] tracking-tight">
                 {title}
               </h2>
 
-              <p className="mt-6 max-w-[400px] text-[20px] font-normal leading-[1.45]">
+              <p className="mt-6 max-w-[440px] text-[24px] font-light leading-relaxed text-gray-100">
                 {description}
               </p>
 
               <Link
                 href={cta.href}
-                className="mt-6 inline-flex h-[68px] min-w-[280px] items-center justify-center rounded-[4px] bg-white px-8 text-[20px] font-normal text-[#222] transition-opacity hover:opacity-90"
+                className="mt-8 inline-flex h-[64px] px-10 min-w-[200px] items-center justify-center rounded-none bg-white text-[18px] font-medium text-black transition-colors hover:bg-gray-300"
               >
                 {cta.label}
               </Link>

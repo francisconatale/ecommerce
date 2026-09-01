@@ -13,18 +13,18 @@ export default function Hero2({ config }: { config: any }) {
         <div className="flex flex-col md:flex-row gap-8 items-center bg-[#f9f9f9] rounded-3xl overflow-hidden p-8 md:p-12">
           
           <div className="w-full md:w-1/2 flex flex-col items-start text-left">
-            <span className="text-sm font-bold tracking-widest uppercase text-zinc-400 mb-4">
+            <span className="text-sm font-medium tracking-widest uppercase text-gray-500 mb-4">
               Featured Edition
             </span>
-            <h2 className="text-[40px] md:text-[56px] font-bold leading-[1.1] text-black mb-6">
+            <h2 className="text-[48px] md:text-[64px] font-light leading-[1.1] tracking-tight text-black mb-6">
               {title}
             </h2>
-            <p className="text-[#666] text-[18px] leading-relaxed mb-8 max-w-[450px]">
+            <p className="text-[#666] text-[20px] font-light leading-relaxed mb-8 max-w-[450px]">
               {description}
             </p>
             <Link 
               href={cta.href}
-              className="inline-flex h-[56px] px-8 items-center justify-center bg-black text-white text-[15px] font-bold rounded-md hover:bg-zinc-800 transition-colors"
+              className="inline-flex h-[56px] px-8 items-center justify-center bg-black text-white text-[16px] font-medium rounded-none hover:bg-gray-500 transition-colors"
             >
               {cta.label}
             </Link>

@@ -26,21 +26,19 @@ export function ProductCard({ product }: ProductCardProps) {
         />
       </div>
 
-      <div className="pt-[7px]">
-        <h3 className="mb-[5px] text-[11px] font-normal leading-[1.1]">
+      <div className="pt-3">
+        <h3 className="mb-2 text-[16px] font-light leading-[1.1] text-black">
           {product.name}
         </h3>
 
-        <div className="flex items-center gap-[7px] text-[10px] leading-none">
-          <span className="text-[#ff2020]">
+        <div className="flex items-center gap-2 text-[14px] leading-none">
+          <span className="text-zinc-600 font-medium">
             $ {product.price.toFixed(2)} {currency}
           </span>
 
           {product.originalPrice !== undefined && (
             <>
-              <span className="text-[#999]">|</span>
-
-              <span className="text-[#999]">
+              <span className="text-zinc-400 line-through">
                 $ {product.originalPrice.toFixed(2)} {currency}
               </span>
             </>

@@ -1,10 +1,12 @@
 import { heroVariants } from "./heroes";
 import { featuredProductsVariants } from "./featured-products";
+import Header from "./layout/Header";
 
 // A global registry mapping section types to their respective variants registry
 const globalRegistry: Record<string, any> = {
   hero: heroVariants,
   featuredProducts: featuredProductsVariants,
+  navbar: { navbar: Header },
 };
 
 export default function StorefrontComposer({ layout }: { layout: any[] }) {
