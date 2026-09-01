@@ -1,20 +1,20 @@
-export default function Hero1() {
+"use client";
+
+import { HeroSection } from "@/components/ui/HeroSection";
+import { siteContent } from "@/config/siteContent";
+
+export default function Hero1({ config }: { config: any }) {
+  const { title, description, image, cta, align = 'center' } = config;
+
   return (
-    <div
-      style={{
-        padding: '60px 40px',
-        background: '#ffebee',
-        border: '2px solid red',
-        textAlign: 'center',
-        color: 'black',
-      }}
-    >
-      <h1 style={{ fontSize: '2.5rem', marginBottom: '12px' }}>
-        🔴 Bienvenido — Tenant A
-      </h1>
-      <p style={{ fontSize: '1.1rem' }}>
-        Componente <strong>Hero 1</strong> — exclusivo para tenant-a.
-      </p>
+    <div className="w-full flex flex-col items-center">
+      <HeroSection
+        title={title}
+        description={description}
+        image={image}
+        cta={cta}
+        align={align}
+      />
     </div>
   );
 }

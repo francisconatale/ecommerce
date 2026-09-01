@@ -1,6 +1,6 @@
-import { ComponentType } from 'react';
-import FeaturedProducts from './FeaturedProducts';
+import { ComponentType } from "react";
+import FeaturedProducts from "./FeaturedProducts";
 
-export const featuredProductsRegistry: Record<string, ComponentType> = {
-  featuredProducts: FeaturedProducts,
+export const featuredProductsVariants: Record<string, ComponentType<any>> = {
+  "featuredProducts": FeaturedProducts,
 };
