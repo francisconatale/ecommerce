@@ -74,7 +74,7 @@ public class ProductControllerIntegrationTest {
                 .andExpect(status().isNoContent());
                 
         // Verification: It shouldn't be found in findAll
-        boolean exists = productService.findAll(org.springframework.data.domain.Pageable.unpaged()).stream().anyMatch(p -> p.getId().equals(product.getId()));
+        boolean exists = productService.findAll(null, org.springframework.data.domain.Pageable.unpaged()).stream().anyMatch(p -> p.getId().equals(product.getId()));
         assertThat(exists).isFalse();
     }
 }

@@ -13,7 +13,7 @@ public interface ProductRepository {
     Product save(Product product);
     List<Product> findByCategoryId(UUID categoryId);
     List<Product> findByCategoryAndDescendants(UUID categoryId);
-    Page<Product> findAll(Pageable pageable);
+    Page<Product> findAll(ProductFilter filter, Pageable pageable);
     void delete(Product product);
 
     default Product getOrThrow(UUID id) {

@@ -2,7 +2,11 @@ package com.eshop.infrastructure.persistence.product;
 
 import com.eshop.domain.product.Product;
 import com.eshop.domain.product.ProductRepository;
+import com.eshop.domain.product.ProductFilter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,25 +54,26 @@ public class ProductRepositoryAdapter implements ProductRepository {
 
     @Override
     public List<Product> findByCategoryId(UUID categoryId) {
-        log.debug("Buscando productos por categoría en DB: {}", categoryId);
+        log.debug("Buscando productos por categoria en DB: {}", categoryId);
         return mapper.toDomain(repository.findByCategoryId(categoryId));
     }
 
     @Override
     public List<Product> findByCategoryAndDescendants(UUID categoryId) {
-        log.debug("Buscando productos de categoría y descendientes en DB: {}", categoryId);
+        log.debug("Buscando productos por categoria y descendientes en DB: {}", categoryId);
         return mapper.toDomain(repository.findByCategoryAndDescendants(categoryId));
     }
 
     @Override
-    public org.springframework.data.domain.Page<Product> findAll(org.springframework.data.domain.Pageable pageable) {
+    public Page<Product> findAll(ProductFilter filter, Pageable pageable) {
         log.debug("Buscando todos los productos en DB (paginado)");
-        return repository.findAll(pageable).map(mapper::toDomain);
+        Specification<ProductEntity> spec = ProductSpecifications.withFilter(filter);
+        return repository.findAll(spec, pageable).map(mapper::toDomain);
     }
 
     @Override
     public void delete(Product product) {
-        log.debug("Borrando producto en DB: {}", product.getId());
+        log.debug("Eliminando producto en DB: {}", product.getId());
         repository.deleteById(product.getId());
     }
 }

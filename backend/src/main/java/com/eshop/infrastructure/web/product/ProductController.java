@@ -6,6 +6,9 @@ import com.eshop.domain.product.ProductService;
 import com.eshop.infrastructure.web.base.ApiResponse;
 import com.eshop.domain.product.CreateProductCommand;
 import com.eshop.domain.product.UpdateProductCommand;
+import com.eshop.domain.product.ProductFilter;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.eshop.infrastructure.web.product.ProductResponse;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +42,8 @@ public class ProductController extends BaseController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<ProductResponse>>> getProducts(Pageable pageable) {
-        Page<ProductResponse> products = productService.findAll(pageable)
+    public ResponseEntity<ApiResponse<Page<ProductResponse>>> getProducts(@Valid @ModelAttribute ProductFilter filter, Pageable pageable) {
+        Page<ProductResponse> products = productService.findAll(filter, pageable)
                 .map(productWebMapper::toResponse);
                 
         if (products.isEmpty()) {

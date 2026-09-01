@@ -25,9 +25,9 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public Page<Product> findAll(Pageable pageable) {
+    public Page<Product> findAll(ProductFilter filter, Pageable pageable) {
         log.info("Obteniendo todos los productos paginados");
-        return productRepository.findAll(pageable);
+        return productRepository.findAll(filter, pageable);
     }
 
     public Product findById(UUID id) {
